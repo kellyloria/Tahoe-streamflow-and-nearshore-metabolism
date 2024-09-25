@@ -15,6 +15,9 @@ see https://github.com/kellyloria/Littoral-Lake-DO for details on saturation and
 
 ### Data aggregation from online sources
 #### Downloading NLDAS and GLDAS data
+
+- _DL scripts refers to download functions for .asc files
+- _processes scripts .asc files with meta data for shore locations 
 #### Downloading SNOTEL data
 #### Downloading USGS gage data
 
