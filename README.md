@@ -14,9 +14,9 @@ see https://github.com/kellyloria/Littoral-Lake-DO for details on saturation and
 ### Nutrient and organic matter data
 
 ### Data aggregation from online sources
-- https://github.com/kellyloria/Tahoe-streamflow-and-nearshore-metabolism/tree/0fe27f9e1c22e13be22846e139a1ed0359f47454/Data_downloads
+- [Download scripts](https://github.com/kellyloria/Tahoe-streamflow-and-nearshore-metabolism/tree/0fe27f9e1c22e13be22846e139a1ed0359f47454/Data_downloads)
 #### Downloading NLDAS and GLDAS data
-- https://github.com/kellyloria/Tahoe-streamflow-and-nearshore-metabolism/tree/0fe27f9e1c22e13be22846e139a1ed0359f47454/Data_downloads/Climate_data
+- [Climate data download scripts](https://github.com/kellyloria/Tahoe-streamflow-and-nearshore-metabolism/tree/0fe27f9e1c22e13be22846e139a1ed0359f47454/Data_downloads/Climate_data)
 - _DL scripts refers to download functions for .asc files
 - _processes scripts .asc files with meta data for shore locations 
 #### Downloading SNOTEL data
@@ -26,8 +26,9 @@ see https://github.com/kellyloria/Littoral-Lake-DO for details on saturation and
 see https://github.com/kellyloria/Littoral-Lake-Metabolism for details on modeling nearshore littoral metabolism
 
 # Accessing project analyses:
-### Statistical inference in the paper 
-#### piecewise SEM for streamflow on GPP and ER 
-#### SEM for precipitation on NEP
-#### Analyzing interannual variation
+- [Statistical analyses](https://github.com/kellyloria/Tahoe-streamflow-and-nearshore-metabolism/tree/main/Analyses)
+- piecewise SEMs for streamflow on GPP and ER at BW and GB
+- SEM for precipitation on NEP at BW, GB, SS, and SH
+- Analysis on interannual variation between dry year 2022 and wet year 2023
+- Analysis on spatial variation in shore characteristics
 
