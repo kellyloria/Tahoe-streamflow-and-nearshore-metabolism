@@ -6,5 +6,16 @@ This project brough in a variety of spatiotemporl data for different sites withi
 
 ## Dissloved oxygen data
 ## SPC and other sensor data 
+## Metabolism data
+## Nutrient and organic matter data
+
+## Data aggregation from online sources
+### Downloading NLDAS and GLDAS data
+### Downloading SNOTEL data
+### Downloading USGS gage data
 ## Nearshore metabolism modeling workflow 
-## Statistical inferemce in the paper 
+## Statistical inference in the paper 
+### piecewise SEM for streamflow on GPP and ER 
+### SEM for precipitation on NEP
+### Analyzing interannual variation
+
