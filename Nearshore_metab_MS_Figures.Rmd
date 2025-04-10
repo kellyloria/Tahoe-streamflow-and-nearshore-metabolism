@@ -1,0 +1,984 @@
+---
+title: 'Nearshore metab. figures '
+author: "Kelly Loria"
+date: "`r Sys.Date()`"
+output:
+   html_document:
+    theme: simplex
+    highlight: tango
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{=html}
+<style type="text/css">
+body, td {font-size: 13px;}
+code.r{font-size: 9px;}
+pre {font-size: 11px}
+</style>
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = F, message = F)
+knitr::opts_knit$set(root.dir = '/Users/kellyloria/Documents/Publications/')
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+```
+
+```{r, echo = F, message = F, include=FALSE}
+### Packages
+#setwd("/Users/kellyloria/Documents/Publications/2024_stream_metab_output/BWL_k600/")
+lapply(c("plyr","dplyr","ggplot2","cowplot",
+         "snotelr","dataRetrieval",
+         "lubridate","tidyverse", "reshape2", "ggpubr", "ggpattern", "broom.mixed",
+         "glmmTMB", "forcats", # order SEM label 
+         "lme4", "lmerTest", "MuMIn", "PerformanceAnalytics", "car"), require, character.only=T)
+```
+
+## 
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+lapply(c("plyr","dplyr","ggplot2","cowplot",
+         "lubridate","tidyverse", "reshape2", "ggpubr", "ggpattern",
+         "lme4", "lmerTest", "MuMIn", "PerformanceAnalytics", "car"), require, character.only=T)
+
+
+site_colors <- c(
+  "BWL" = "#3283a8",
+  "GBL" = "#a67d17")
+
+
+shore_colors <- c(
+  "BW" = "#3283a8",
+  "SS" = "#136F63",
+  "GB" = "#a67d17",
+  "SH" = "#c76640")
+
+shore_fill <- c(
+  "BW" = "#3283a8",
+  "SS" = "#136F63",
+  "GB" = "#a67d17",
+  "SH" = "#c76640")
+
+## Fxn for water year:
+water_year <- function(data) {
+  # Ensure the `date` column exists
+  if (!"date" %in% names(data)) {
+    stop("The dataframe must contain a column named 'date'.")
+  }
+  
+  # Convert the `date` column to Date format (if not already)
+  data$date <- as.Date(data$date)
+  
+  # Add the water_year column
+  data$water_year <- with(data, {
+    year <- as.numeric(format(date, "%Y"))
+    month <- as.numeric(format(date, "%m"))
+    ifelse(month >= 10, year + 1, year)
+  })
+  
+  return(data)
+}
+
+# Define fill patterns for water years
+water_year_patterns <- c("wave","weave","stripe","circle", "stripe", "circle")
+
+```
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+dat <-readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_analysis_dat.rds")
+```
+
+
+
+##### Kernal density plots of GPP and ER
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+ datwy <- water_year(dat)
+
+WY2022_KD_plot <- ggplot(
+  datwy %>% 
+    dplyr::filter(water_year == 2022, shore %in% c("BW", "GB", "SS")), 
+  aes(x = middle_GPP, y = middle_ER, color = shore, shape = shore)
+) +
+  geom_density_2d(bins = 5, size = 0.25) + 
+  geom_point(alpha = 0.5, size=0.75) +
+  geom_abline(slope = -1, intercept = 0, color = "black") +  # 1:1 line
+  annotate("text", x = 7, y = -1, label = "WY 2022", size = 4, hjust = 0.5, color = "grey50") +
+  xlab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  ylab(expression(ER~(mmol~O[2]~m^-3~d^-1))) +
+  scale_x_continuous(position = "top", limits = c(0, 13)) +
+  scale_y_continuous(limits = c(-18, 0)) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63")
+  ) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 1, "GB" = 2, "SS" = 0)
+  ) +
+  theme_classic()
+
+
+WY2023_KD_plot <- ggplot(
+  datwy %>% 
+    dplyr::filter(water_year == 2023, shore %in% c("BW", "GB", "SS")), 
+  aes(x = middle_GPP, y = middle_ER, color = shore, shape = shore)
+) +
+  geom_density_2d(bins = 5, size = 0.25) + 
+  geom_point(alpha = 0.5, size=0.75) +
+  geom_abline(slope = -1, intercept = 0, color = "black") +  # 1:1 line
+  annotate("text", x = 7, y = -1, label = "WY 2023", size = 4, hjust = 0.5, color = "grey50") +
+  xlab(NULL) +
+  #xlab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  ylab(expression(ER~(mmol~O[2]~m^-3~d^-1))) +
+  scale_x_continuous(position = "top", limits = c(0, 13)) +
+  scale_y_continuous(limits = c(-18, 0)) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63")
+  ) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 1, "GB" = 2, "SS" = 0)
+  ) +
+  theme_classic()
+
+# 
+# BWU_DF_fixed <- covariat_datq%>%dplyr::filter(site=="BWU") %>%
+#   filter(water_year < 2024) %>%
+#   mutate(water_year = factor(water_year, levels = c(2021, 2022, 2023, 2024))) %>%
+#   bind_rows(tibble(GPP_mean = NA, ER_mean = NA, water_year = factor(2024, levels = c(2021, 2022, 2023, 2024))))  # Add dummy row
+
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=9, fig.height=6}
+
+KD_grid <- ggarrange(
+  WY2022_KD_plot,
+  WY2023_KD_plot,
+  labels = c("b"),
+  align=c("v"),
+  label.x = 0.1,
+  label.y = 0.95,
+ common.legend = T,
+   legend = "bottom",
+ heights = c(0.53,0.47),
+  hjust = 1,
+  vjust = 1,
+  ncol = 1, nrow = 2)
+
+KD_grid
+
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=9, fig.height=6}
+
+datwy1 <- datwy %>%dplyr::filter(shore=="SS" | shore=="BW"| shore=="GB")
+
+plot_NEPWY <- ggplot(datwy1%>%dplyr::filter(water_year>2021 & middle_NEP>-25), aes(x = interaction(water_year, shore), y = (middle_NEP), pattern = as.factor(water_year), fill = shore)) +
+  geom_jitter(aes(color = shore), width = 0.1, height = 0.01, alpha = 0.25) +  # Adding jittered points with 50% transparency
+  geom_boxplot_pattern(alpha = 0.9, outlier.alpha = 0.5,
+                       pattern_density = 0.25,  
+                       pattern_spacing = 0.05,  
+                       pattern_fill = "black",  
+                       pattern_angle = 45) +  
+  geom_hline(yintercept = 0) +
+  scale_pattern_manual(name="WY",
+    values = c("2023" = "stripe", "2022" = "none")) +
+  scale_fill_manual(name="Shore",
+    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+  scale_color_manual(name="Shore",
+    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+  theme_classic() + #ylim(0,25)+
+  theme(legend.position = "right") +
+  scale_x_discrete(labels = (c("BW", "BW", "GB", "GB", "SH", "SS", "SS"))) +
+  labs(y = expression("NEP"~(mmol~O[2]~m^-3~d^-1)), x = NULL)
+
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=9, fig.height=6}
+
+KD_grid2 <- ggarrange(
+  KD_grid,
+  plot_NEPWY,
+  labels = c("", "c"),
+  align=c("v"),
+  label.x = 0.95,
+  label.y = 0.98,
+# common.legend = T,
+  # legend = "bottom",
+  hjust = 1,
+  vjust = 1,
+widths = c(0.75, 0.4),
+  ncol = 2, nrow = 1
+)
+
+KD_grid2
+KD_grid3 <- plot_grid(KD_grid, plot_NEPWY, 
+          labels = c("", "c"),
+          label_x = 0.8,
+          label_y = 0.99,
+          align = "v",
+          ncol = 2,
+          rel_widths = c(1.25, 0.9),
+          axis = "tb") # this helps align axes if needed
+
+
+```
+
+
+
+
+```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# identify and scrape data from USGS gages for target sites (BW and GB)
+
+# Define the site numbers for "GB" and "BW"
+siteNo_GB <- "10336730"
+siteNo_BW <- "10336660"
+
+# Define the parameter codes for flow and stage
+pCode_flow <- "00060"
+pCode_stage <- "00065"
+
+# Set the start date to "1980-01-01" and end date to today (current date)
+start.date <- "2003-09-30"
+end.date <- "2024-10-30" #Sys.Date()  # Use the current date as the end date
+
+# Ensure that dplyr functions are correctly used
+flow_data_GB <- readNWISdata(siteNumbers = siteNo_GB, parameterCd = pCode_flow, startDate = start.date, endDate = end.date) %>%
+  mutate(site = "GBL", catch = "GB") %>%
+  dplyr::rename(date = dateTime, dischargeCFS = X_00060_00003) %>%
+  mutate(
+    dischargeCMS = dischargeCFS * 0.0283168,
+    scale_Q = ((dischargeCFS * 0.0283168) / 10.64485)) %>%
+    dplyr::select(date, dischargeCFS, site, catch, dischargeCMS, scale_Q)
+
+# View the processed data
+print(head(flow_data_GB))
+
+flow_data_BW <- readNWISdata(siteNumbers = siteNo_BW, parameterCd = pCode_flow, startDate = start.date, endDate = end.date) %>%
+  mutate(site = "BWL", catch = "BW") %>%
+   dplyr::rename(date = dateTime, dischargeCFS = X_00060_00003) %>%
+  mutate(
+    dischargeCMS = dischargeCFS * 0.0283168,
+    scale_Q = ((dischargeCFS * 0.0283168) / 29.00787)
+  ) %>%
+  dplyr::select(date, dischargeCFS, site, catch, dischargeCMS, scale_Q)
+
+
+# Combine data for both sites
+flow_data <- rbind(flow_data_GB, flow_data_BW)
+```
+
+
+## 2. Hydro-climate characterization
+
+Major question to address:
+
+-   How do the watersheds filter surface water inputs to streams based on differences in local climate (precipitation events, snow-accumulation and snow-melt)?
+
+##### Function for water year:
+
+```{r eval=TRUE, echo = F, error=FALSE, warning=FALSE, message=FALSE}
+# fxn for water year
+water_year <- function(data) {
+  data %>%
+    mutate(date = ymd(date)) %>%
+    mutate(WaterYear = if_else(month(date) >= 10, year(date) + 1, year(date)))
+}
+```
+
+##### Read in data from SNOTEL
+
+```{r eval=TRUE, echo = F, include=F, error=FALSE, warning=FALSE, message=FALSE}
+# read in the sites data for all SNOTEL sites
+target_snow_data <- snotelr::snotel_download(network = "sntl",
+                                             site_id = c(848, 615), 
+                                             metric = TRUE, internal = TRUE)
+target_snow_data$date<- as.Date(target_snow_data$date)
+
+# transform for water year:
+target_snow_dat<- water_year(target_snow_data)
+
+#Trim for columns 
+target_snow_df <- target_snow_dat %>%
+  filter(WaterYear>2003) %>%
+  filter(date < as.Date("2024-10-10")) %>%
+  mutate(site = case_when(
+    site_id == 615 ~ "GBL",
+    site_id %in% c(848) ~ "BWL")) %>%
+  dplyr::select(site_name,site_id,date,snow_water_equivalent,precipitation_cumulative,
+         temperature_max,temperature_min,temperature_mean,precipitation,WaterYear,
+         site)
+```
+
+
+## B. Melt and stream flow.
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
+snowflow_dat <- left_join(target_snow_df, 
+                          flow_data, by = c("date", "site")) %>%
+  mutate(dischargeCMD = scale_Q * 86400) %>%
+  group_by(site, WaterYear)%>%
+  arrange(date) %>%  
+  mutate(accum_SWE = cumsum(snow_water_equivalent),
+         accum_Qm3D = cumsum(dischargeCMD))
+  
+``` 
+
+
+
+### Estimate values for: 
+
+- Total accumulated SWE per water year in mm/yr
+
+- Water yield (cms/km yr)
+
+- Max SWE measurement mm
+
+- Max precipitation accumulation (ppt) in mm 
+
+
+```{r, echo=T, error=FALSE, warning=FALSE, include=T, message=FALSE}
+
+snowflow_dat_sum <- snowflow_dat%>%
+  filter(WaterYear<2025) %>%
+  group_by(site, WaterYear) %>%
+ dplyr::summarise(Total_SWE = max(accum_SWE, na.rm=T),
+            Water_yield = max(accum_Qm3D, na.rm = T),
+            Max_SWE = max(snow_water_equivalent, na.rm=T),
+            Total_ppt = max(precipitation_cumulative, na.rm=T),
+            scale_pk_Q = max(scale_Q, na.rm = T)
+            )
+
+
+### get 20 year water year averages
+snowflow_HA <- snowflow_dat_sum%>%
+  filter(WaterYear<2025) %>%
+  group_by(site) %>%
+   dplyr::summarise(mean_SWE_acc = mean(Total_SWE, na.rm=T),
+            mean_Water_yield = mean(Water_yield, na.rm = T),
+            mean_SWE = mean(Max_SWE, na.rm = T),
+            mean_ppt_acc = mean(Total_ppt, na.rm = T)
+            )
+
+
+
+snowflow_HA1 <- snowflow_dat_sum%>%
+  filter(WaterYear>2020 & WaterYear<2024) %>%
+  mutate(WY_lab = case_when(
+    WaterYear %in% c(2021, 2022) ~ "dry",
+    WaterYear %in% c(2023) ~ "wet",
+    TRUE ~ NA_character_  )) %>%
+    group_by(site,WY_lab) %>%
+   dplyr::summarise(mean_SWE_acc = mean(Total_SWE, na.rm=T),
+            mean_Water_yield = mean(Water_yield, na.rm = T),
+            mean_SWE = mean(Max_SWE, na.rm = T),
+            mean_ppt_acc = mean(Total_ppt, na.rm = T),
+            m_pk_Q= mean(scale_pk_Q, na.rm=T)
+            )
+
+```
+
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
+
+ppt_accum_plots <- ggplot(snowflow_dat_sum, aes(x = WaterYear, y = Total_ppt*0.001, color = site, shape=site)) +
+  annotate("rect", xmin = -Inf, xmax = 2021.5, ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.3) +
+annotate("rect", xmin = 2023.5, xmax = Inf, ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.3) +
+  geom_point(size = 1.5, alpha = 0.95, position = position_dodge(width = 0.1)) +
+  geom_line(position = position_dodge(width = 0.1))+
+    geom_hline(yintercept = 1718.2429*0.001, col = "#3283a8", lty = 2) + 
+  geom_hline(yintercept = 843.7667*0.001, col = "#a67d17", lty = 2) + 
+  theme_bw() + 
+ # geom_vline(xintercept = 2021.5, linetype = "dotted", color = "grey30") +
+#    geom_vline(xintercept = 2023.5, linetype = "dotted", color = "grey30") +
+  ylab(expression("PPT"~(m~y^-1))) +
+  xlab(NULL) + scale_color_manual(values = site_colors) +
+  theme(legend.position =  "none") +
+        scale_shape_manual(name = "Shore",
+                     values = c("BWL" = 19, 
+                                "GBL" = 17)) +
+        scale_x_continuous(breaks = seq(floor(min(snowflow_dat_sum$WaterYear)), ceiling(max(snowflow_dat_sum$WaterYear)), by = 5), labels = function(x) as.character(round(x)))
+  
+  
+  
+```
+
+
+### streamflow for each catchment WY 22 and WY 23 
+
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
+
+snowflow_dat <- as.data.frame(snowflow_dat)
+
+snowflow_dat$date <- as.Date(snowflow_dat$date)
+
+
+
+flow_plot1 <- ggplot(
+  snowflow_dat %>% filter(date > as.Date("2021-09-30") & date < as.Date("2023-09-14")),
+  aes(x = date, y = scale_Q, color = site)
+) +
+  geom_line(position = position_dodge(width = 0.1)) +
+  geom_vline(xintercept = as.Date("2022-09-30"), linetype = "dashed", color = "grey50",ltwd=0.5) +
+  theme_classic() + 
+  scale_x_date(
+  date_breaks = "8 week",
+  date_labels = "%b-%y",
+  limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))) +
+  ylab(expression("Streamflow"~(m^3~s^-1~km^2))) +
+  xlab(NULL) + 
+   annotate("text", x = as.Date("2022-08-10"), y = 0.03, label = "WY 2022", size = 4, color="grey50")  +
+     annotate("text", x = as.Date("2022-11-10"), y = 0.03, label = "WY 2023", size = 4, color="grey50")+
+
+  scale_color_manual(values = site_colors) +
+  theme(legend.position = "none")
+
+
+str(snowflow_dat)
+```
+
+
+### 20 years of SWE accumulation and water yield  
+
+The dashed lines represent the site 20-year average annual (WY) values for total SWE or water catchment normalized water yield 
+
+```{r, warning=F, echo=F,include=F, fig.width=8, fig.height=10}
+library(cowplot)
+
+# Create the main plot and the inset
+main_plot <- flow_plot1
+inset_plot <- ppt_accum_plots
+
+# Combine using draw_plot() with positioning
+combined_plot <- ggdraw() +
+  draw_plot(main_plot) +  # full-size base plot
+  draw_plot(inset_plot, 
+            x = 0.075,     # horizontal position (0 = left, 1 = right)
+            y = 0.5,     # vertical position (0 = bottom, 1 = top)
+            width = 0.45,  # width of the inset (relative to full plot)
+            height = 0.45) # height of the inset
+
+# Show it
+combined_plot
+
+
+## align = hv in cow plot high light the years that mountain so that the y axis starts in the same way 
+## scale_y_continours
+
+### to scale the water yeild - scale_y_continuous(trans = "log")
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=F, fig.width=6, fig.height=4}
+# ggsave("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/Figs/Hydro_panel_long.png", plot = combined_plot, width = 8.5, height = 4, units = "in")
+
+```
+
+## Revised Figure 2: 
+
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=9, fig.height=6}
+
+fig2_grid <- ggarrange(
+  combined_plot,
+  KD_grid3,
+  labels = c("a", ""),
+  align=c("v"),
+  label.x = 0.95,
+  label.y = 1,
+ common.legend = T,
+   legend = "bottom",
+ heights = c(0.5,0.6),
+  hjust = 1,
+  vjust = 1,
+  ncol = 1, nrow = 2)
+fig2_grid
+
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/Figs/Revised_Fig2.png", plot = fig2_grid, width = 8, height = 7.5, units = "in")
+
+```
+
+
+
+
+#### Data structure of SEM: 
+
+Water year **2021:** 2021-06-10 to 2021-09-30
+
+- Just BWNS and GBNS
+
+Water year **2022:** 2021-09-30 to 2022-09-14
+
+- Just BWNS, GBNS, SSNS1
+
+Water year **2023:** 2022-09-30 to 2023-09-14
+
+- Just BWNS, GBNS, and SSNS
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+## BWNS SEM output:
+SEM_BW21 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_21.rds") %>%
+  mutate(water_year=2021)
+
+SEM_BW22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_BW23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23.rds") %>%
+  mutate(water_year=2023)
+
+## GBNS SEM output:
+SEM_GB21 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_21.rds") %>%
+  mutate(water_year=2021)
+
+SEM_GB22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_GB23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23.rds") %>%
+  mutate(water_year=2023)
+
+
+## SSNS SEM output:
+SEM_SS22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_SS23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_23.rds") %>%
+  mutate(water_year=2023)
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+# 
+# SEM_df_GPP_22 <- rbind(SEM_BW22, SEM_GB22, SEM_SS22)
+# 
+# ci_summary_overall <- SEM_df_GPP_22 %>%
+#   dplyr::group_by(Coefficient, shore, water_year) %>%
+#   dplyr:: summarize(
+#     mean = mean(Estimate),
+#     l_95 = quantile(Estimate, 0.025),
+#     u_95 = quantile(Estimate, 0.975),
+#     .groups = "drop"
+#   )
+# 
+# 
+# coef_order <- c(
+#   "b_plotGPP_plot_GPP_lag",
+#   "b_plotGPP_lake_tempC",
+#   "b_plotGPP_light_mean",
+#   "b_plotGPP_flow_mean",
+#   "b_laketempC_flow_mean",
+#   "b_laketempC_ppt_mm",
+#   "b_lightmean_flow_mean",
+#   "b_lightmean_ppt_mm"
+# )
+# 
+# ci_summary_overall1 <- ci_summary_overall %>%
+#   mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+# 
+# 
+# # coefficient plot
+# coef_plot_gpp_22 <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, color = shore, shape=shore)) +
+#   geom_point(position = position_dodge(width = 0.6), size = 2.5) +
+#   geom_errorbarh(aes(xmin = l_95, xmax = u_95),
+#                  position = position_dodge(width = 0.6), height = 0) +
+#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+#   scale_color_manual(name = "Shore", values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+#   theme_minimal() +
+#   xlim(-5.25, 1.40) +
+#   labs(
+#     x = NULL,
+#     y = "Water year 2022",
+#     title = "GPP",
+#   ) +
+#   theme(
+#     axis.text.y = element_text(size = 10),
+#     legend.position = "right"
+#   )  + scale_y_discrete(labels = c(
+#     "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+#     "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+#     "b_plotGPP_light_mean" = "Metab. ~ Light",
+#     "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+#     "b_laketempC_flow_mean" = "Temp ~ Flow",
+#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
+#     "b_lightmean_flow_mean" = "Light ~ Flow",
+#     "b_lightmean_ppt_mm" = "Light ~ PPT"
+#   ))
+# 
+# coef_plot_gpp_22
+
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+# 
+# SEM_df_GPP_23 <- rbind(SEM_BW23, SEM_GB23, SEM_SS23)
+# 
+# ci_summary_overall <- SEM_df_GPP_23 %>%
+#   dplyr::group_by(Coefficient, shore, water_year) %>%
+#   dplyr:: summarize(
+#     mean = mean(Estimate),
+#     l_95 = quantile(Estimate, 0.025),
+#     u_95 = quantile(Estimate, 0.975),
+#     .groups = "drop"
+#   )
+# 
+# 
+# coef_order <- c(
+#   "b_plotGPP_plot_GPP_lag",
+#   "b_plotGPP_lake_tempC",
+#   "b_plotGPP_light_mean",
+#   "b_plotGPP_flow_mean",
+#   "b_laketempC_flow_mean",
+#   "b_laketempC_ppt_mm",
+#   "b_lightmean_flow_mean",
+#   "b_lightmean_ppt_mm"
+# )
+# 
+# ci_summary_overall1 <- ci_summary_overall %>%
+#   mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+# 
+# 
+# # coefficient plot
+# coef_plot_gpp_23 <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, color = shore, shape=shore)) +
+#   geom_point(position = position_dodge(width = 0.6), size = 2.5) +
+#   geom_errorbarh(aes(xmin = l_95, xmax = u_95),
+#                  position = position_dodge(width = 0.6), height = 0) +
+#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+#   scale_color_manual(name = "Shore", values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+#   theme_minimal() +
+#   xlim(-5.25, 1.40) +
+#   labs(
+#     x = "Estimate (posterior mean ± 95% CI)",
+#     y = "Water year 2023",
+#   ) +
+#   theme(
+#     axis.text.y = element_text(size = 10),
+#     legend.position = "right"
+#   )  + scale_y_discrete(labels = c(
+#     "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+#     "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+#     "b_plotGPP_light_mean" = "Metab. ~ Light",
+#     "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+#     "b_laketempC_flow_mean" = "Temp ~ Flow",
+#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
+#     "b_lightmean_flow_mean" = "Light ~ Flow",
+#     "b_lightmean_ppt_mm" = "Light ~ PPT"
+#   ))
+# 
+# coef_plot_gpp_23
+
+```
+
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=8, fig.height=6}
+
+# SEM_GPP_grid <- ggarrange(
+#   coef_plot_gpp_22,
+#   coef_plot_gpp_23,
+#  # labels = c("a", "b"),
+#   align=c("v"),
+#   #label.x = 0.1, 
+#   #label.y = 1, 
+#  common.legend = T,
+#    legend = "bottom",
+#   hjust = 1,  
+#   vjust = 1,  
+#   ncol = 1, nrow = 2) 
+# 
+# SEM_GPP_grid
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=8, fig.height=6}
+
+SEM_df_GPP_comb <- rbind(SEM_BW22, SEM_GB22, SEM_SS22, 
+                         SEM_BW23, SEM_GB23, SEM_SS23)
+
+ci_summary_overall <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, shore, water_year) %>%
+  dplyr:: summarize(
+    mean = mean(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+
+coef_order <- c(
+  "b_plotGPP_plot_GPP_lag",
+  "b_plotGPP_lake_tempC",
+  "b_plotGPP_light_mean",
+  "b_plotGPP_flow_mean",
+  "b_laketempC_flow_mean",
+  "b_laketempC_ppt_mm",
+  "b_lightmean_flow_mean",
+  "b_lightmean_ppt_mm"
+)
+
+ci_summary_overall1 <- ci_summary_overall %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+
+levels(ci_summary_overall1$Coefficient)
+
+
+ci_summary_overall1 <- ci_summary_overall1 %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+####
+coef_plot_gpp <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, 
+                                                 color = point_shape, shape = point_shape)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3, alpha=0.9) +
+  geom_errorbarh(aes(xmin = l_95, xmax = u_95),
+                 position = position_dodge(width = 0.5), height = 0, alpha=0.45) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+  scale_color_manual(name = "Shore and water year", 
+                     values = c("BW 2022" = "#3283a8", "BW 2023" = "#3283a8",
+                                "GB 2022" = "#a67d17", "GB 2023" = "#a67d17",
+                                "SS 2022" = "#136F63", "SS 2023" = "#136F63")) +
+  
+  scale_shape_manual(name = "Shore and water year",
+                     values = c("BW 2022" = 1, "BW 2023" = 19, 
+                                "GB 2022" = 2, "GB 2023" = 17, 
+                                "SS 2022" = 0, "SS 2023" = 15)) +
+
+  theme_minimal() +
+  labs(
+    x = "Estimate (posterior mean ± 95% CI)",
+    y = NULL,
+    title = "GPP"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  ) +
+  scale_y_discrete(labels = c(
+    "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+    "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+    "b_plotGPP_light_mean" = "Metab. ~ Light",
+    "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+    "b_laketempC_flow_mean" = "Temp ~ Flow",
+    "b_laketempC_ppt_mm" = "Temp ~ PPT",
+    "b_lightmean_flow_mean" = "Light ~ Flow",
+    "b_lightmean_ppt_mm" = "Light ~ PPT"
+  ))
+
+
+coef_plot_gpp
+
+```
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+## BWNS SEM output:
+SEM_BW21e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_21.rds") %>%
+  mutate(water_year=2021)
+
+SEM_BW22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_BW23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_23.rds") %>%
+  mutate(water_year=2023)
+
+## GBNS SEM output:
+SEM_GB21e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_21.rds") %>%
+  mutate(water_year=2021)
+
+SEM_GB22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_GB23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_23.rds") %>%
+  mutate(water_year=2023)
+
+
+## SSNS SEM output:
+SEM_SS22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_SS_22.rds") %>%
+  mutate(water_year=2022)
+
+SEM_SS23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_SS_23.rds") %>%
+  mutate(water_year=2023)
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=8, fig.height=6}
+
+SEM_df_ER_comb <- rbind(SEM_BW22e, SEM_GB22e, SEM_SS22e, 
+                         SEM_BW23e, SEM_GB23e, SEM_SS23e)
+
+ci_summary_overalle <- SEM_df_ER_comb %>%
+  dplyr::group_by(Coefficient, shore, water_year) %>%
+  dplyr:: summarize(
+    mean = mean(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+
+coef_ordere <- c(
+  "b_plotER_plot_ER_lag",
+  "b_plotER_lake_tempC",
+  "b_plotER_light_mean",
+  "b_plotER_flow_mean",
+  "b_laketempC_flow_mean",
+  "b_laketempC_ppt_mm",
+  "b_lightmean_flow_mean",
+  "b_lightmean_ppt_mm"
+)
+
+ci_summary_overall1e<- ci_summary_overalle %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_ordere)))
+
+levels(ci_summary_overall1$Coefficient)
+
+
+ci_summary_overall1e <- ci_summary_overall1e %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+####
+coef_plot_er <- ggplot(ci_summary_overall1e, aes(x = mean, y = Coefficient, 
+                                                 color = point_shape, shape = point_shape)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3, alpha=0.9) +
+  geom_errorbarh(aes(xmin = l_95, xmax = u_95),
+                 position = position_dodge(width = 0.5), height = 0, alpha=0.45) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+  scale_color_manual(name = "Shore and water year", 
+                     values = c("BW 2022" = "#3283a8", "BW 2023" = "#3283a8",
+                                "GB 2022" = "#a67d17", "GB 2023" = "#a67d17",
+                                "SS 2022" = "#136F63", "SS 2023" = "#136F63")) +
+  
+  scale_shape_manual(name = "Shore and water year",
+                     values = c("BW 2022" = 1, "BW 2023" = 19, 
+                                "GB 2022" = 2, "GB 2023" = 17, 
+                                "SS 2022" = 0, "SS 2023" = 15)) +
+
+  theme_minimal() +
+  labs(
+    x = "Estimate (posterior mean ± 95% CI)",
+    y = NULL,
+    title = "ER"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  ) + scale_y_discrete(labels=NULL)
+# +
+#   scale_y_discrete(labels = c(
+#     "b_plotER_plot_ER_lag" = "Metab. ~ AR",
+#     "b_plotER_lake_tempC" = "Metab. ~ Temp.",
+#     "b_plotER_light_mean" = "Metab. ~ Light",
+#     "b_plotER_flow_mean" = "Metab. ~ Flow",
+#     "b_laketempC_flow_mean" = "Temp ~ Flow",
+#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
+#     "b_lightmean_flow_mean" = "Light ~ Flow",
+#     "b_lightmean_ppt_mm" = "Light ~ PPT"
+#   ))
+
+
+coef_plot_er
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=8, fig.height=6}
+
+SEM_grid <- ggarrange(
+  coef_plot_gpp,
+  coef_plot_er,
+ # labels = c("a", "b"),
+  align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+ common.legend = T,
+   legend = "bottom",
+  hjust = 0.1,
+  vjust = 1,
+  ncol = 2, nrow = 1)
+
+SEM_grid
+
+```
+
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+# 
+# library(ggridges)
+# library(ggplot2)
+# library(dplyr)
+# 
+# # Optional: Filter out coefficients you don't want
+# SEM_df_GPP_22_filtered <- SEM_df_GPP_22 %>%
+#   filter(!(shore == "SS" & Coefficient %in% c("b_plotGPP_flow_mean", "b_laketempC_flow_mean", "b_lightmean_flow_mean")))
+# 
+# # Plot using ggridges
+# coef_density_plot <- ggplot(SEM_df_GPP_22_filtered, 
+#                             aes(x = Estimate, y = Coefficient, fill = shore, color = shore)) +
+#   ggridges::geom_density_ridges(
+#     scale = 1.5, 
+#     alpha = 0.6,
+#     rel_min_height = 0.05,
+#     color = "black"
+#   ) +
+#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+#   scale_fill_manual(values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+#   scale_color_manual(values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+#   theme_minimal() +
+#   labs(
+#     x = "Mean posterior estimate and 95% CI",
+#     y = "Water year 2023",
+#   ) +
+#   theme(
+#     axis.text.y = element_text(size = 10),
+#     legend.position = "right"
+#   )
+# 
+# coef_density_plot
+
+
+```
+

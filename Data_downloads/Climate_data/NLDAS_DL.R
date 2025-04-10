@@ -144,23 +144,41 @@ NLDAS_DL(
 ## streams
 
 NLDAS_DL(
-  save_dir = "./NLDAS/stream/light/",
-  Site_ID = "BWL", # 39.1075414	-120.1646811
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/light/",
+  Site_ID = "BWLv2", # 39.1075414	-120.1646811
   Lat = "39.1075414", 
   Lon = "-120.1646811",
-  startDate = "2020-01-01",
-  endDate = "2024-01-01"
+  startDate = "2020-09-20",
+  endDate = "2024-08-01"
 )
 
 
+NLDAS_DL(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/light/",
+  Site_ID = "BWU", # 39.105291, -120.195904
+  Lat = "39.105291", 
+  Lon = "-120.195904",
+  startDate = "2021-06-01",
+  endDate = "2024-08-01"
+)
 
 NLDAS_DL(
-  save_dir = "./NLDAS/stream/light/",
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/light/",
   Site_ID = "GBL", # 39.0880435	-119.9389446
   Lat = "39.0880435", 
   Lon = "-119.9389446",
-  startDate = "2020-01-01",
-  endDate = "2024-01-01"
+  startDate = "2021-03-20",
+  endDate = "2024-08-01"
+)
+
+
+NLDAS_DL(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/light/",
+  Site_ID = "GBU", # 39.086730, -119.931449
+  Lat = "39.086730", 
+  Lon = "-119.931449",
+  startDate = "2021-03-20",
+  endDate = "2024-08-01"
 )
 
 # end of script.

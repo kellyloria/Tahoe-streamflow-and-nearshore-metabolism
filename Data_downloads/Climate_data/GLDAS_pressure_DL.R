@@ -20,7 +20,10 @@
 
 DL_GLDAS <- function(save_dir, Site_ID, Lat, Lon, startDate, endDate){
   #The initial string to build the URL
-  http_string <- paste("https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Psurf_f_inst")
+  http_string <- paste("https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:Psurf_f_inst")
+  # https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:Psurf_f_inst&startDate=2011-01-01T00:00&endDate=2012-12-31T21:00&location=GEOM:POINT(-93.125,%2041.125)&type=asc2
+  
+    #  http_string <- paste("https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc")
 
   #Separating the date information
   start_split <- strsplit(startDate, "-")[[1]]
@@ -28,10 +31,14 @@ DL_GLDAS <- function(save_dir, Site_ID, Lat, Lon, startDate, endDate){
 
   #Build individual components of the url
   location_string <- paste0("&location=GEOM:POINT(", Lon, ",%20", Lat, ")")
-  start_string <- paste0("&startDate=", start_split[1], "-", start_split[2], "-",
-                         start_split[3], "T00")
-  end_string <- paste0("&endDate=", end_split[1], "-", end_split[2], "-",
-                       end_split[3], "T00")
+  # start_string <- paste0("&startDate=", start_split[1], "-", start_split[2], "-",
+  #                        start_split[3], "T00")
+  # end_string <- paste0("&endDate=", end_split[1], "-", end_split[2], "-",
+  #                      end_split[3], "T00")
+  
+  start_string <- paste0("&startDate=", start_split[1], "-", start_split[2], "-", start_split[3], "T00:00:00")
+  end_string <- paste0("&endDate=", end_split[1], "-", end_split[2], "-", end_split[3], "T23:59:59")
+  
   #Generating the URL
   url <-paste0(http_string, location_string, start_string, end_string, "&type=asc2")
 
@@ -138,24 +145,186 @@ DL_GLDAS(
 
 ###
 
-
 DL_GLDAS(
-  save_dir = "./NLDAS/stream/baro/",
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
   Site_ID = "BWL", # 39.1075414	-120.1646811
-  Lat = "39.1075414", 
-  Lon = "-120.1646811",
-  startDate = "2020-01-01",
-  endDate = "2024-01-01"
+  Lat = "39.107541", 
+  Lon = "-120.164681",
+  startDate = "2020-09-20",
+  endDate = "2023-08-01"
 )
+
+DL_GLDAS(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
+  Site_ID = "BWU", # 39.105291, -120.195904
+  Lat = "39.105291", 
+  Lon = "-120.195904",
+  startDate = "2021-06-01",
+  endDate = "2024-09-01"
+)
+
+DL_GLDAS(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
+  Site_ID = "GBLv2", # 39.0880435	-119.9389446
+  Lat = "39.08804", 
+  Lon = "-119.93895",
+  startDate = "2021-03-20",
+  endDate = "2023-08-01"
+)
+
+DL_GLDAS(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
+  Site_ID = "GBU", # 39.086730, -119.931449
+  Lat = "39.086730", 
+  Lon = "-119.931449",
+  startDate = "2021-03-20",
+  endDate = "2023-10-10"
+)
+# end of script.
+
+DL_GLDAS <- function(save_dir, Site_ID, Lat, Lon, startDate, endDate) {
+  # Base URL for the API
+  http_string <- "https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi"
+  
+  # Full variable path (with prefix if needed)
+  variable_param <- "GLDAS2:GLDAS_NOAH025_3H_v2.0:Psurf_f_inst"
+#   GLDAS_NOAH025_3H_EP_v2.1
+  
+  # Update location format to use a comma
+  location_string <- paste0("&location=GEOM:POINT(", Lon, ",", Lat, ")")
+  
+  # Format start and end date strings
+  start_string <- paste0("&startDate=", startDate, "T00:00:00")
+  end_string <- paste0("&endDate=", endDate, "T23:59:59")
+  
+  # Construct full URL
+  url <- paste0(http_string, "?variable=", variable_param, location_string, start_string, end_string, "&type=asc2")
+  
+  # Define destination file path
+  destfile <- file.path(save_dir, paste0(Site_ID, "_GLDAS.asc"))
+  
+  # Attempt download
+  try_result <- try(download.file(url, destfile, quiet = FALSE), silent = TRUE)
+  
+  # Handle errors if download fails
+  if (class(try_result) == "try-error") {
+    file.remove(destfile)
+    cat("Download failed: Check URL and parameters.\n")
+  } else {
+    cat("Download succeeded: File saved to", destfile, "\n")
+  }
+}
+
+
+
+
+
+# Load httr library for handling authentication
+library(httr)
+
+DL_GLDAS <- function(save_dir, Site_ID, Lat, Lon, startDate, endDate, username, password) {
+  # Base URL for the API
+  http_string <- "https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi"
+  
+  # Define variable and location
+  variable_param <- "GLDAS2:GLDAS_NOAH025_3H_v2.0:Psurf_f_inst"
+  location_string <- paste0("&location=GEOM:POINT(", Lon, ",", Lat, ")")
+  
+  # Define start and end dates
+  start_string <- paste0("&startDate=", startDate, "T00:00:00")
+  end_string <- paste0("&endDate=", endDate, "T23:59:59")
+  
+  # Construct the full URL
+  url <- paste0(http_string, "?variable=", variable_param, location_string, start_string, end_string, "&type=asc2")
+  
+  # Define the file path to save
+  destfile <- file.path(save_dir, paste0(Site_ID, "_GLDAS.asc"))
+  
+  # Perform the download with authentication
+  try_result <- try(
+    GET(url, authenticate(username, password), write_disk(destfile, overwrite = TRUE)),
+    silent = TRUE
+  )
+  
+  # Error handling
+  if (class(try_result) == "try-error") {
+    cat("Download failed: Please check URL, parameters, and authentication.\n")
+  } else if (status_code(try_result) != 200) {
+    file.remove(destfile)
+    cat("Download failed: HTTP error", status_code(try_result), "\n")
+  } else {
+    cat("Download succeeded: File saved to", destfile, "\n")
+  }
+}
 
 
 DL_GLDAS(
-  save_dir = "./NLDAS/stream/baro/",
-  Site_ID = "GBL", # 39.0880435	-119.9389446
-  Lat = "39.0880435", 
-  Lon = "-119.9389446",
-  startDate = "2020-01-01",
-  endDate = "2024-01-01"
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
+  Site_ID = "GBU",
+  Lat = "39.086730",
+  Lon = "-119.931449",
+  startDate = "2021-03-20",
+  endDate = "2024-10-10",
+  username = "kelly.loria",
+  password = "TahoePines2022/"
 )
 
-# end of script.
+
+
+
+DL_GLDAS(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",
+  Site_ID = "GBU",
+  Lat = "39.086730",
+  Lon = "-119.931449",
+  startDate = "2021-03-20",
+  endDate = "2021-10-10"
+)
+
+
+
+# Load httr for HTTP requests and authentication
+library(httr)
+
+# Function to download NLDAS data for PSurf
+download_nldas_psurf <- function(save_dir, Site_ID, Lat, Lon, startDate, endDate, username, password) {
+  # Base URL for the API
+  base_url <- "https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi"
+  
+  # NLDAS variable for surface pressure (PSurf)
+  variable_param <- "NLDAS_FORA0125_H_2.0:PSurf"
+  
+  # Construct the location in the GEOM:POINT format
+  location_string <- paste0("&location=GEOM:POINT(", Lon, "%20", Lat, ")")
+  
+  # Define the start and end date (format YYYY-MM-DD)
+  start_string <- paste0("&startDate=", startDate, "T00:00:00")
+  end_string <- paste0("&endDate=", endDate, "T23:59:59")
+  
+  # Construct the full request URL
+  url <- paste0(base_url, "?variable=", variable_param, location_string, start_string, end_string, "&type=asc2")
+  
+  # Define destination file path
+  destfile <- file.path(save_dir, paste0(Site_ID, "_NLDAS_PSurf.asc"))
+  
+  
+  # Check for errors
+  if (class(response) == "try-error") {
+    cat("Download failed: Please check the URL, parameters, or authentication.\n")
+  } else if (status_code(response) != 200) {
+    file.remove(destfile)
+    cat("Download failed: HTTP error", status_code(response), "\n")
+  } else {
+    cat("Download succeeded: File saved to", destfile, "\n")
+  }
+}
+
+# Example of how to call the function
+download_nldas_psurf(
+  save_dir = "/Users/kellyloria/Documents/LittoralMetabModeling/RawData/NLDAS/stream/baro/",   # Replace with your directory path
+  Site_ID = "GBU",                        # Site ID, e.g., "GBU"
+  Lat = "39.086730",                      # Latitude
+  Lon = "-119.931449",                    # Longitude
+  startDate = "2021-03-20",               # Start date
+  endDate = "2021-10-10",                 # End date
+)
