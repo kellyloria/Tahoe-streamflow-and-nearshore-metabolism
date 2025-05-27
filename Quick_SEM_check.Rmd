@@ -1,0 +1,578 @@
+---
+title: 'SEM input comp'
+author: "Kelly Loria"
+date: "`r Sys.Date()`"
+output:
+   html_document:
+    theme: simplex
+    highlight: tango
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{=html}
+<style type="text/css">
+body, td {font-size: 13px;}
+code.r{font-size: 9px;}
+pre {font-size: 11px}
+</style>
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = F, message = F)
+knitr::opts_knit$set(root.dir = '/Users/kellyloria/Documents/Publications/')
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+```
+
+```{r, echo = F, message = F, include=FALSE}
+### Packages
+#setwd("/Users/kellyloria/Documents/Publications/2024_stream_metab_output/BWL_k600/")
+lapply(c("plyr","dplyr","ggplot2","cowplot",
+         "snotelr","dataRetrieval",
+         "lubridate","tidyverse", "reshape2", "ggpubr", "ggpattern", "broom.mixed",
+         "glmmTMB", "forcats", # order SEM label 
+         "lme4", "lmerTest", "MuMIn", "PerformanceAnalytics", "car"), require, character.only=T)
+```
+
+
+#### Data structure of SEM: 
+
+Water year **2021:** 2021-06-10 to 2021-09-30
+
+- Just BWNS and GBNS
+
+Water year **2022:** 2021-09-30 to 2022-09-14
+
+- Just BWNS, GBNS, SSNS1
+
+Water year **2023:** 2022-09-30 to 2023-09-14
+
+- Just BWNS, GBNS, and SSNS
+
+```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+## BWNS SEM output:
+
+SEM_BW22_log <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22v2.rds") %>%
+  mutate(water_year=2022,
+         input = "logged")
+
+unique(SEM_BW22_log$Coefficient)
+
+SEM_BW22_log$Coefficient <- SEM_BW22_log$Coefficient %>%
+  sub("_log_", "_", .) %>%
+  sub("_z$", "", .)
+
+
+SEM_BW22_hlogn <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22v4.rds") %>%
+  mutate(water_year=2022,
+          input = "hurdle_lognormal"
+         )
+
+
+SEM_BW22_hlogn_newA <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22v5.rds") %>%
+  mutate(water_year=2022,
+          input = "hurdle_lognormal_flow_ppt"
+         )
+
+
+SEM_BW22_hlogn_newA2 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22v6.rds") %>%
+  mutate(water_year=2022,
+          input = "hurdle_lognormal_flow_ppt_var"
+         )
+
+SEM_GB22_hlogn_newA2 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22v3.rds") %>%
+  mutate(water_year=2022,
+          input = "hurdle_lognormal_flow_ppt_var"
+         )
+
+
+
+SEM_BW23_hlogn <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23v6.rds") %>%
+  mutate(water_year=2023,
+          input = "23_hurdle_lognormal_flow_ppt_var"
+         )
+
+SEM_BW23_hlogn_lv <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23v7.rds") %>%
+  mutate(water_year=2023,
+          input = "23_hurdle_lognormal_flow_ppt"
+         )
+
+
+SEM_GB22log <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22_GPP_logflow.rds") %>%
+  mutate(water_year=2022,
+                   input = "22- log_flow_no_cutoffs"
+)
+
+
+SEM_GB22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22_GPP_final.rds") %>%
+  mutate(water_year=2022,
+             input = "22-old")
+
+
+SEM_GB23log <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23_GPP_logflow.rds") %>%
+  mutate(water_year=2023,
+                   input = "23- log_flow_no_cutoffs"
+)
+
+
+SEM_GB23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23_GPP_final.rds") %>%
+  mutate(water_year=2023,
+             input = "23-old")
+
+
+
+unique(SEM_GB22$Coefficient)
+
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=T, fig.width=9, fig.height=6}
+
+SEM_df_GPP_comb <- rbind(SEM_BW22_log, SEM_BW22_hlogn, SEM_BW22_hlogn_newA, SEM_BW22_hlogn_newA2)
+
+SEM_df_GPP_comb <- rbind(SEM_GB22log, SEM_GB22, SEM_GB23, SEM_GB23log)
+
+
+ci_summary_overall <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, shore, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+ci_summary_overallT <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+
+
+coef_order <- c(
+  "b_plotGPP_plot_GPP_lag",
+  "b_plotGPP_lake_tempC",
+  "b_plotGPP_light_mean",
+  "b_plotGPP_flow_mean",
+  "b_laketempC_flow_mean",
+  "b_laketempC_ppt_mm",
+  "b_lightmean_flow_mean",
+  "b_lightmean_ppt_mm",
+  "b_flowmean_ppt_mm"
+)
+
+ci_summary_overall1 <- ci_summary_overall %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+
+levels(ci_summary_overall1$Coefficient)
+
+
+ci_summary_overall1 <- ci_summary_overall1 %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+
+coef_plot_gpp
+
+SEM_df_GPP_comb <- SEM_df_GPP_comb%>% 
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order))) %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow dry (WY 2022)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow wet (WY 2023)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
+
+
+
+SEM_df_GPP_comb$point_shape <- factor(
+  SEM_df_GPP_comb$point_shape,
+  levels = c(
+    "No inflow wet (WY 2023)",
+    "No inflow dry (WY 2022)",
+    "Small inflow wet (WY 2023)",
+    "Small inflow dry (WY 2022)",
+    "Large inflow wet (WY 2023)",
+    "Large inflow dry (WY 2022)" # draw last = appear on top
+  )
+)
+
+
+
+#
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot  <- ggplot(SEM_df_GPP_comb, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = input,
+  color = point_shape
+)) +
+  geom_violin(
+  width = 0.5,
+  alpha = 0.5,
+  scale = "width",
+  trim = FALSE,
+  position = position_identity()
+)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5))
+
+  # ) +
+  #   scale_color_manual(name = "Flow regime and water year", 
+  #                    values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+  #                               "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+  #                               "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+  #     scale_fill_manual(name = "Flow regime and water year", 
+  #                    values = c("logged" = "pink", "hurdle_lognormal_flow_ppt" = "orange", "hurdle_lognormal" = "green", 
+  #                               "hurdle_lognormal_flow_ppt_var" ="blue")) +
+  # 
+  # labs(
+  #   x = "Estimate",
+  #   y = NULL,
+  #   title = "GPP SEM Coefficients"
+  # ) +
+  #   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  # geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  # geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+  #   theme(
+  #   axis.text.y = element_text(size = 10),
+  #   legend.position = "right"
+  # ) +
+  # xlim(-0.85,0.85) +
+  #   theme_minimal() +
+  # scale_y_discrete(labels = c(
+  #   "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+  #   "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+  #   "b_plotGPP_light_mean" = "Metab. ~ Light",
+  #   "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+  #   "b_laketempC_flow_mean" = "Temp ~ Flow",
+  #   "b_laketempC_ppt_mm" = "Temp ~ PPT",
+  #   "b_lightmean_flow_mean" = "Light ~ Flow",
+  #   "b_lightmean_ppt_mm" = "Light ~ PPT",
+  #   "b_flowmean_ppt_mm" = "Flow ~ PPT"
+  # )) 
+
+
+coef_violin_plot
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=T, fig.width=8, fig.height=5}
+
+SEM_df_GPP_comb <- rbind(SEM_BW22_hlogn_newA2, SEM_BW23_hlogn, SEM_GB22_hlogn_newA2)
+
+ci_summary_overall <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, shore, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+ci_summary_overallT <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+
+
+coef_order <- c(
+  "b_plotGPP_plot_GPP_lag",
+  "b_plotGPP_lake_tempC",
+  "b_plotGPP_light_mean",
+  "b_plotGPP_flow_mean",
+  "b_laketempC_flow_mean",
+  "b_laketempC_ppt_mm",
+  "b_lightmean_flow_mean",
+  "b_lightmean_ppt_mm",
+  "b_flowmean_ppt_mm"
+)
+
+ci_summary_overall1 <- ci_summary_overall %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+
+levels(ci_summary_overall1$Coefficient)
+
+
+ci_summary_overall1 <- ci_summary_overall1 %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+
+coef_plot_gpp
+
+SEM_df_GPP_comb <- SEM_df_GPP_comb%>% 
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order))) %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow dry (WY 2022)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow wet (WY 2023)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
+
+
+
+SEM_df_GPP_comb$point_shape <- factor(
+  SEM_df_GPP_comb$point_shape,
+  levels = c(
+    "No inflow wet (WY 2023)",
+    "No inflow dry (WY 2022)",
+    "Small inflow wet (WY 2023)",
+    "Small inflow dry (WY 2022)",
+    "Large inflow wet (WY 2023)",
+    "Large inflow dry (WY 2022)" # draw last = appear on top
+  )
+)
+
+
+
+#
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot  <- ggplot(SEM_df_GPP_comb, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = input,
+  color = point_shape
+)) +
+  geom_violin(
+  width = 0.5,
+  alpha = 0.5,
+  scale = "width",
+  trim = FALSE,
+  position = position_identity()
+)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+
+  ) +
+    scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+      scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("hurdle_lognormal_flow_ppt" = "orange", 
+                                "hurdle_lognormal_flow_ppt_var" ="blue", 
+                               "23_hurdle_lognormal_flow_ppt_var" ="white")) +
+
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "GPP SEM Coefficients"
+  ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+    theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  ) +
+  xlim(-0.85,0.85) +
+    theme_minimal() +
+  scale_y_discrete(labels = c(
+    "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+    "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+    "b_plotGPP_light_mean" = "Metab. ~ Light",
+    "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+    "b_laketempC_flow_mean" = "Temp ~ Flow",
+    "b_laketempC_ppt_mm" = "Temp ~ PPT",
+    "b_lightmean_flow_mean" = "Light ~ Flow",
+    "b_lightmean_ppt_mm" = "Light ~ PPT",
+    "b_flowmean_ppt_mm" = "Flow ~ PPT"
+  )) 
+
+
+coef_violin_plot
+
+
+```
+
+
+
+
+```{r, warning=F, size = 'small', echo=F, include=T, fig.width=8, fig.height=5}
+
+SEM_df_GPP_comb <- rbind(SEM_BW22_hlogn_newA, SEM_BW23_hlogn_lv)
+
+ci_summary_overall <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, shore, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+ci_summary_overallT <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, water_year, input) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+
+
+coef_order <- c(
+  "b_plotGPP_plot_GPP_lag",
+  "b_plotGPP_lake_tempC",
+  "b_plotGPP_light_mean",
+  "b_plotGPP_flow_mean",
+  "b_laketempC_flow_mean",
+  "b_laketempC_ppt_mm",
+  "b_lightmean_flow_mean",
+  "b_lightmean_ppt_mm",
+  "b_flowmean_ppt_mm"
+)
+
+ci_summary_overall1 <- ci_summary_overall %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+
+levels(ci_summary_overall1$Coefficient)
+
+
+ci_summary_overall1 <- ci_summary_overall1 %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+
+coef_plot_gpp
+
+SEM_df_GPP_comb <- SEM_df_GPP_comb%>% 
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order))) %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow dry (WY 2022)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow wet (WY 2023)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
+
+
+
+SEM_df_GPP_comb$point_shape <- factor(
+  SEM_df_GPP_comb$point_shape,
+  levels = c(
+    "No inflow wet (WY 2023)",
+    "No inflow dry (WY 2022)",
+    "Small inflow wet (WY 2023)",
+    "Small inflow dry (WY 2022)",
+    "Large inflow wet (WY 2023)",
+    "Large inflow dry (WY 2022)" # draw last = appear on top
+  )
+)
+
+
+
+#
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot  <- ggplot(SEM_df_GPP_comb, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = input,
+  color = point_shape
+)) +
+  geom_violin(
+  width = 0.5,
+  alpha = 0.5,
+  scale = "width",
+  trim = FALSE,
+  position = position_identity()
+)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+
+  ) +
+    scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+      scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("hurdle_lognormal_flow_ppt" = "orange", 
+                               "23_hurdle_lognormal_flow_ppt" ="white")) +
+
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "GPP SEM Coefficients"
+  ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+    theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  ) +
+  xlim(-0.85,0.85) +
+    theme_minimal() +
+  scale_y_discrete(labels = c(
+    "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+    "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+    "b_plotGPP_light_mean" = "Metab. ~ Light",
+    "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+    "b_laketempC_flow_mean" = "Temp ~ Flow",
+    "b_laketempC_ppt_mm" = "Temp ~ PPT",
+    "b_lightmean_flow_mean" = "Light ~ Flow",
+    "b_lightmean_ppt_mm" = "Light ~ PPT",
+    "b_flowmean_ppt_mm" = "Flow ~ PPT"
+  )) 
+
+
+coef_violin_plot
+
+
+```

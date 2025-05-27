@@ -25,13 +25,13 @@ se <- function(dat){
 ## read data aggregated data for the project:
 #============================================
 # time-series data: 
-datQ <- readRDS("./NS_analysis_dat.rds")
+datQ <- readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_analysis_dat.rds") 
 summary(datQ)
 str(datQ)
 
 # Chemistry data: 
 # EDI link: 
-chem_dat <- readRDS("./NS_chem_dat.rds")
+chem_dat <- readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_chem_dat.rds")
 unique(chem_dat$site)
 summary(chem_dat) 
 
@@ -39,37 +39,12 @@ summary(chem_dat)
 ## weekly aggregation  
 ##===========================================
 
+
 week_dat <- datQ %>%
-  group_by(site, shore, week, WaterYear, position) %>%
-  summarise(
-    middle_GPP=mean(middle_GPP, na.rm = TRUE),
-    lower_GPP=mean(lower_GPP, na.rm = TRUE),
-    upper_GPP=mean(upper_GPP, na.rm = TRUE),
-    middle_ER=mean(middle_ER, na.rm = TRUE),
-    lower_ER=mean(lower_ER, na.rm = TRUE),
-    upper_ER=mean(upper_ER, na.rm = TRUE),
-    ## Weather 
-    tmean_C=mean(tmean_C, na.rm = TRUE),
-    light_mean=mean(light_mean, na.rm = TRUE),
-    windsp_mean=mean(windsp_mean, na.rm = TRUE),
-    ppt_mm=mean(ppt_mm, na.rm = TRUE),
-    log_ppmt=mean(log_ppmt, na.rm = TRUE),
-    ppmt_sum=sum(precip_bi, na.rm = TRUE),
-    ## lake quality 
-    lake_tempC=mean(lake_tempC, na.rm = TRUE),
-    lake_DO=mean(lake_DO, na.rm = TRUE),
-    lake_SPC=mean(lake_SPC, na.rm = TRUE),
-    Kd_fill=mean(Kd_fill, na.rm = TRUE),
-    par_int_3m=mean(par_int_3m, na.rm = TRUE),
-    real_NS_depth=mean(real_NS_depth, na.rm = TRUE),
-    ## Stream quality 
-    flow_mean_m=mean(flow_mean, na.rm = TRUE),
-    log_streamflow=mean(log_streamflow, na.rm = TRUE),
-    flow_sum=sum(flow_mean * 86400, na.rm = TRUE),
-    stream_SPC=mean(stream_SPC, na.rm = TRUE),
-    stream_DO=mean(stream_DO, na.rm = TRUE),
-    stream_temp=mean(stream_temp, na.rm = TRUE))
-    
+  dplyr::select(-date, -yday) %>%  # drop the 'date' column
+  dplyr::group_by(site, shore, week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
 summary(week_dat)
 ##===========================================
 ## create a new df for complete GPP obs 
@@ -259,6 +234,14 @@ chem_dat_stream_tab <- chem_dat %>%
     pH_infill_m= mean(pH_infill, na.rm=T),
     pH_infill_min= min(pH_infill, na.rm=T),
     pH_infill_max= max(pH_infill, na.rm=T))
+
+
+chem_dat_stream_tab <- chem_dat %>%
+  filter(location=="lake") %>%
+  filter(WaterYear>2021) %>%
+  group_by(shore, substrate, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE))
+
 
 # write.csv(chem_dat_stream_tab, file = "./Chem_table1.csv", row.names = TRUE)
 

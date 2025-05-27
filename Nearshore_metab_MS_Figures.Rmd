@@ -41,7 +41,8 @@ lapply(c("plyr","dplyr","ggplot2","cowplot",
          "lme4", "lmerTest", "MuMIn", "PerformanceAnalytics", "car"), require, character.only=T)
 ```
 
-## 
+### Question 1
+How does stream inflow regulate littoral environmental conditions (e.g. nutrient availability, water temperature, and light availability) and nearshore metabolism between a relatively dry water year versus wet water year?
 
 ```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
 lapply(c("plyr","dplyr","ggplot2","cowplot",
@@ -104,17 +105,17 @@ dat <-readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scr
 
 WY2022_KD_plot <- ggplot(
   datwy %>% 
-    dplyr::filter(water_year == 2022, shore %in% c("BW", "GB", "SS")), 
+    dplyr::filter(WaterYear == 2022, shore %in% c("BW", "GB", "SS")), 
   aes(x = middle_GPP, y = middle_ER, color = shore, shape = shore)
 ) +
-  geom_density_2d(bins = 5, size = 0.25) + 
+  geom_density_2d(bins = 5, size = 0.45) + 
   geom_point(alpha = 0.5, size=0.75) +
   geom_abline(slope = -1, intercept = 0, color = "black") +  # 1:1 line
-  annotate("text", x = 7, y = -1, label = "WY 2022", size = 4, hjust = 0.5, color = "grey50") +
+  annotate("text", x = 20, y = -1, label = "WY 2022", size = 4, hjust = 0.5, color = "grey50") +
   xlab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
   ylab(expression(ER~(mmol~O[2]~m^-3~d^-1))) +
-  scale_x_continuous(position = "top", limits = c(0, 13)) +
-  scale_y_continuous(limits = c(-18, 0)) +
+  scale_x_continuous(position = "top", limits = c(0, 25)) +
+  scale_y_continuous(limits = c(-25, 0)) +
   scale_color_manual(
     name = "Shore",
     values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63")
@@ -122,24 +123,25 @@ WY2022_KD_plot <- ggplot(
   scale_shape_manual(
     name = "Shore",
     values = c("BW" = 1, "GB" = 2, "SS" = 0)
-  ) +
+  ) + theme(legend.position = "none") +
+  guides(color = "none", shape = "none") +
   theme_classic()
 
 
 WY2023_KD_plot <- ggplot(
   datwy %>% 
-    dplyr::filter(water_year == 2023, shore %in% c("BW", "GB", "SS")), 
+    dplyr::filter(WaterYear == 2023, shore %in% c("BW", "GB", "SS")), 
   aes(x = middle_GPP, y = middle_ER, color = shore, shape = shore)
 ) +
-  geom_density_2d(bins = 5, size = 0.25) + 
+  geom_density_2d(bins = 5, size = 0.45) + 
   geom_point(alpha = 0.5, size=0.75) +
   geom_abline(slope = -1, intercept = 0, color = "black") +  # 1:1 line
-  annotate("text", x = 7, y = -1, label = "WY 2023", size = 4, hjust = 0.5, color = "grey50") +
+  annotate("text", x = 20, y = -1, label = "WY 2023", size = 4, hjust = 0.5, color = "grey50") +
   xlab(NULL) +
   #xlab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
   ylab(expression(ER~(mmol~O[2]~m^-3~d^-1))) +
-  scale_x_continuous(position = "top", limits = c(0, 13)) +
-  scale_y_continuous(limits = c(-18, 0)) +
+  scale_x_continuous(position = "top", limits = c(0, 25)) +
+  scale_y_continuous(limits = c(-25, 0)) +
   scale_color_manual(
     name = "Shore",
     values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63")
@@ -147,7 +149,8 @@ WY2023_KD_plot <- ggplot(
   scale_shape_manual(
     name = "Shore",
     values = c("BW" = 1, "GB" = 2, "SS" = 0)
-  ) +
+  ) + theme(legend.position = "none") +
+  guides(color = "none", shape = "none") +
   theme_classic()
 
 # 
@@ -168,11 +171,11 @@ KD_grid <- ggarrange(
   align=c("v"),
   label.x = 0.1,
   label.y = 0.95,
- common.legend = T,
-   legend = "bottom",
+# common.legend = T,
+   #legend = "right",
  heights = c(0.53,0.47),
-  hjust = 1,
-  vjust = 1,
+#  hjust = 1,
+#  vjust = 1,
   ncol = 1, nrow = 2)
 
 KD_grid
@@ -184,7 +187,7 @@ KD_grid
 
 datwy1 <- datwy %>%dplyr::filter(shore=="SS" | shore=="BW"| shore=="GB")
 
-plot_NEPWY <- ggplot(datwy1%>%dplyr::filter(water_year>2021 & middle_NEP>-25), aes(x = interaction(water_year, shore), y = (middle_NEP), pattern = as.factor(water_year), fill = shore)) +
+plot_NEPWY <- ggplot(datwy1%>%dplyr::filter(WaterYear>2021 & middle_NEP>-25), aes(x = interaction(WaterYear, shore), y = (middle_NEP), pattern = as.factor(WaterYear), fill = shore)) +
   geom_jitter(aes(color = shore), width = 0.1, height = 0.01, alpha = 0.25) +  # Adding jittered points with 50% transparency
   geom_boxplot_pattern(alpha = 0.9, outlier.alpha = 0.5,
                        pattern_density = 0.25,  
@@ -193,13 +196,32 @@ plot_NEPWY <- ggplot(datwy1%>%dplyr::filter(water_year>2021 & middle_NEP>-25), a
                        pattern_angle = 45) +  
   geom_hline(yintercept = 0) +
   scale_pattern_manual(name="WY",
-    values = c("2023" = "stripe", "2022" = "none")) +
-  scale_fill_manual(name="Shore",
-    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
-  scale_color_manual(name="Shore",
-    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+    values = c("2023" = "stripe", "2022" = "none"),   labels = c(
+    "2023" = "Wet",
+    "2022" = "Dry")) +
+  scale_fill_manual(
+  name = "Shore",
+  values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640"),
+  labels = c(
+    SS = "No inflow",
+    BW = "Large inflow",
+    GB = "Small inflow"
+  )
+) +
+scale_color_manual(
+  name = "Shore",
+  values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640"),
+  labels = c(
+    SS = "No inflow",
+    BW = "Large inflow",
+    GB = "Small inflow"
+  )
+) +
   theme_classic() + #ylim(0,25)+
   theme(legend.position = "right") +
+  guides(
+    fill = guide_legend(nrow = 4),
+    color = guide_legend(nrow = 5)) +
   scale_x_discrete(labels = (c("BW", "BW", "GB", "GB", "SH", "SS", "SS"))) +
   labs(y = expression("NEP"~(mmol~O[2]~m^-3~d^-1)), x = NULL)
 
@@ -219,79 +241,49 @@ KD_grid2 <- ggarrange(
   label.y = 0.98,
 # common.legend = T,
   # legend = "bottom",
-  hjust = 1,
+#  hjust = 1,
   vjust = 1,
 widths = c(0.75, 0.4),
   ncol = 2, nrow = 1
 )
 
 KD_grid2
-KD_grid3 <- plot_grid(KD_grid, plot_NEPWY, 
-          labels = c("", "c"),
-          label_x = 0.8,
-          label_y = 0.99,
-          align = "v",
-          ncol = 2,
-          rel_widths = c(1.25, 0.9),
-          axis = "tb") # this helps align axes if needed
+# KD_grid3 <- plot_grid(KD_grid, plot_NEPWY, 
+#           labels = c("", "c"),
+#           label_x = 0.8,
+#           label_y = 0.99,
+#           align = "h",
+#           ncol = 2,
+#           #rel_widths = c(1.15, 1),
+#           rel_heights = c(2, 0.1),
+#           axis = "tb") # this helps align axes if needed
+# 
+
+KD_grid3 <- plot_grid(
+  KD_grid, plot_NEPWY, 
+  labels = c("", "c"),
+  label_x = 0.8,
+  label_y = 0.99,
+  align = "h",
+  ncol = 2,
+  rel_widths = c(1, 1.15),  # Adjust these to your taste
+  axis = "tb"
+)
+
 
 
 ```
 
 
+```{r, eval=T, echo = F, error=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 
-
-```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE, include=FALSE}
-# identify and scrape data from USGS gages for target sites (BW and GB)
-
-# Define the site numbers for "GB" and "BW"
-siteNo_GB <- "10336730"
-siteNo_BW <- "10336660"
-
-# Define the parameter codes for flow and stage
-pCode_flow <- "00060"
-pCode_stage <- "00065"
-
-# Set the start date to "1980-01-01" and end date to today (current date)
-start.date <- "2003-09-30"
-end.date <- "2024-10-30" #Sys.Date()  # Use the current date as the end date
-
-# Ensure that dplyr functions are correctly used
-flow_data_GB <- readNWISdata(siteNumbers = siteNo_GB, parameterCd = pCode_flow, startDate = start.date, endDate = end.date) %>%
-  mutate(site = "GBL", catch = "GB") %>%
-  dplyr::rename(date = dateTime, dischargeCFS = X_00060_00003) %>%
-  mutate(
-    dischargeCMS = dischargeCFS * 0.0283168,
-    scale_Q = ((dischargeCFS * 0.0283168) / 10.64485)) %>%
-    dplyr::select(date, dischargeCFS, site, catch, dischargeCMS, scale_Q)
-
-# View the processed data
-print(head(flow_data_GB))
-
-flow_data_BW <- readNWISdata(siteNumbers = siteNo_BW, parameterCd = pCode_flow, startDate = start.date, endDate = end.date) %>%
-  mutate(site = "BWL", catch = "BW") %>%
-   dplyr::rename(date = dateTime, dischargeCFS = X_00060_00003) %>%
-  mutate(
-    dischargeCMS = dischargeCFS * 0.0283168,
-    scale_Q = ((dischargeCFS * 0.0283168) / 29.00787)
-  ) %>%
-  dplyr::select(date, dischargeCFS, site, catch, dischargeCMS, scale_Q)
-
-
-# Combine data for both sites
-flow_data <- rbind(flow_data_GB, flow_data_BW)
+flow_df <- readRDS("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/data/CH1_flow_df.rds")
+flow_df
 ```
 
 
-## 2. Hydro-climate characterization
-
-Major question to address:
-
--   How do the watersheds filter surface water inputs to streams based on differences in local climate (precipitation events, snow-accumulation and snow-melt)?
-
+```{r, eval=TRUE, echo = F, error=FALSE, warning=FALSE, message=FALSE}
 ##### Function for water year:
-
-```{r eval=TRUE, echo = F, error=FALSE, warning=FALSE, message=FALSE}
 # fxn for water year
 water_year <- function(data) {
   data %>%
@@ -300,9 +292,10 @@ water_year <- function(data) {
 }
 ```
 
+
+```{r, eval=TRUE, echo = F, include=F, error=FALSE, warning=FALSE, message=FALSE}
 ##### Read in data from SNOTEL
 
-```{r eval=TRUE, echo = F, include=F, error=FALSE, warning=FALSE, message=FALSE}
 # read in the sites data for all SNOTEL sites
 target_snow_data <- snotelr::snotel_download(network = "sntl",
                                              site_id = c(848, 615), 
@@ -325,13 +318,13 @@ target_snow_df <- target_snow_dat %>%
 ```
 
 
+```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
 ## B. Melt and stream flow.
 
-```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
-snowflow_dat <- left_join(target_snow_df, 
-                          flow_data, by = c("date", "site")) %>%
-  mutate(dischargeCMD = scale_Q * 86400) %>%
-  group_by(site, WaterYear)%>%
+snowflow_dat <- target_snow_df %>%
+  dplyr::left_join(flow_df, by = c("date", "site")) %>%
+  mutate(dischargeCMD = Q_m * 86400) %>%
+  dplyr::group_by(site, WaterYear)%>%
   arrange(date) %>%  
   mutate(accum_SWE = cumsum(snow_water_equivalent),
          accum_Qm3D = cumsum(dischargeCMD))
@@ -340,54 +333,14 @@ snowflow_dat <- left_join(target_snow_df,
 
 
 
-### Estimate values for: 
-
-- Total accumulated SWE per water year in mm/yr
-
-- Water yield (cms/km yr)
-
-- Max SWE measurement mm
-
-- Max precipitation accumulation (ppt) in mm 
-
-
-```{r, echo=T, error=FALSE, warning=FALSE, include=T, message=FALSE}
+```{r, echo=T, error=FALSE, warning=FALSE, include=F, message=FALSE}
 
 snowflow_dat_sum <- snowflow_dat%>%
   filter(WaterYear<2025) %>%
-  group_by(site, WaterYear) %>%
- dplyr::summarise(Total_SWE = max(accum_SWE, na.rm=T),
+ dplyr:: group_by(site, WaterYear) %>%
+ dplyr::summarise(
             Water_yield = max(accum_Qm3D, na.rm = T),
-            Max_SWE = max(snow_water_equivalent, na.rm=T),
-            Total_ppt = max(precipitation_cumulative, na.rm=T),
-            scale_pk_Q = max(scale_Q, na.rm = T)
-            )
-
-
-### get 20 year water year averages
-snowflow_HA <- snowflow_dat_sum%>%
-  filter(WaterYear<2025) %>%
-  group_by(site) %>%
-   dplyr::summarise(mean_SWE_acc = mean(Total_SWE, na.rm=T),
-            mean_Water_yield = mean(Water_yield, na.rm = T),
-            mean_SWE = mean(Max_SWE, na.rm = T),
-            mean_ppt_acc = mean(Total_ppt, na.rm = T)
-            )
-
-
-
-snowflow_HA1 <- snowflow_dat_sum%>%
-  filter(WaterYear>2020 & WaterYear<2024) %>%
-  mutate(WY_lab = case_when(
-    WaterYear %in% c(2021, 2022) ~ "dry",
-    WaterYear %in% c(2023) ~ "wet",
-    TRUE ~ NA_character_  )) %>%
-    group_by(site,WY_lab) %>%
-   dplyr::summarise(mean_SWE_acc = mean(Total_SWE, na.rm=T),
-            mean_Water_yield = mean(Water_yield, na.rm = T),
-            mean_SWE = mean(Max_SWE, na.rm = T),
-            mean_ppt_acc = mean(Total_ppt, na.rm = T),
-            m_pk_Q= mean(scale_pk_Q, na.rm=T)
+            Total_ppt = max(precipitation_cumulative, na.rm=T)
             )
 
 ```
@@ -418,10 +371,10 @@ annotate("rect", xmin = 2023.5, xmax = Inf, ymin = -Inf, ymax = Inf, fill = "gre
 ```
 
 
-### streamflow for each catchment WY 22 and WY 23 
-
 
 ```{r, echo=FALSE, error=FALSE, warning=FALSE, include=F, message=FALSE}
+### streamflow for each catchment WY 22 and WY 23 
+
 
 snowflow_dat <- as.data.frame(snowflow_dat)
 
@@ -431,7 +384,7 @@ snowflow_dat$date <- as.Date(snowflow_dat$date)
 
 flow_plot1 <- ggplot(
   snowflow_dat %>% filter(date > as.Date("2021-09-30") & date < as.Date("2023-09-14")),
-  aes(x = date, y = scale_Q, color = site)
+  aes(x = date, y = Q_m, color = site)
 ) +
   geom_line(position = position_dodge(width = 0.1)) +
   geom_vline(xintercept = as.Date("2022-09-30"), linetype = "dashed", color = "grey50",ltwd=0.5) +
@@ -442,18 +395,19 @@ flow_plot1 <- ggplot(
   limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))) +
   ylab(expression("Streamflow"~(m^3~s^-1~km^2))) +
   xlab(NULL) + 
-   annotate("text", x = as.Date("2022-08-10"), y = 0.03, label = "WY 2022", size = 4, color="grey50")  +
-     annotate("text", x = as.Date("2022-11-10"), y = 0.03, label = "WY 2023", size = 4, color="grey50")+
+   annotate("text", x = as.Date("2022-08-10"), y = 0.65, label = "WY 2022", size = 3.5, color="grey50")  +
+     annotate("text", x = as.Date("2022-11-15"), y = 0.65, label = "WY 2023", size = 3.5, color="grey50")+
 
   scale_color_manual(values = site_colors) +
-  theme(legend.position = "none")
+    theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 
-
-str(snowflow_dat)
 ```
 
 
-### 20 years of SWE accumulation and water yield  
+20 years of SWE accumulation and water yield  
 
 The dashed lines represent the site 20-year average annual (WY) values for total SWE or water catchment normalized water yield 
 
@@ -468,9 +422,9 @@ inset_plot <- ppt_accum_plots
 combined_plot <- ggdraw() +
   draw_plot(main_plot) +  # full-size base plot
   draw_plot(inset_plot, 
-            x = 0.075,     # horizontal position (0 = left, 1 = right)
+            x = 0.095,     # horizontal position (0 = left, 1 = right)
             y = 0.5,     # vertical position (0 = bottom, 1 = top)
-            width = 0.45,  # width of the inset (relative to full plot)
+            width = 0.42,  # width of the inset (relative to full plot)
             height = 0.45) # height of the inset
 
 # Show it
@@ -491,20 +445,20 @@ combined_plot
 
 ## Revised Figure 2: 
 
-```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=9, fig.height=6}
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=9, fig.height=10}
 
 fig2_grid <- ggarrange(
   combined_plot,
   KD_grid3,
   labels = c("a", ""),
-  align=c("v"),
+ align=c("v"),
   label.x = 0.95,
   label.y = 1,
  common.legend = T,
    legend = "bottom",
- heights = c(0.5,0.6),
-  hjust = 1,
-  vjust = 1,
+ heights = c(0.35,0.65),
+ # hjust = 1,
+  #vjust = 1,
   ncol = 1, nrow = 2)
 fig2_grid
 
@@ -514,7 +468,7 @@ fig2_grid
 
 
 ```{r, warning=F, size = 'small', echo=F, include=FALSE}
-# ggsave("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/Figs/Revised_Fig2.png", plot = fig2_grid, width = 8, height = 7.5, units = "in")
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Revised_Fig2.png", plot = fig2_grid, width = 6.35, height = 7.5, units = "in")
 
 ```
 
@@ -536,182 +490,32 @@ Water year **2023:** 2022-09-30 to 2023-09-14
 - Just BWNS, GBNS, and SSNS
 
 ```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
-## BWNS SEM output:
-SEM_BW21 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_21.rds") %>%
-  mutate(water_year=2021)
 
-SEM_BW22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22.rds") %>%
+SEM_BW22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22_final_logflow.rds") %>%
   mutate(water_year=2022)
 
-SEM_BW23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23.rds") %>%
+SEM_BW23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23_final_logflow.rds") %>%
   mutate(water_year=2023)
 
-## GBNS SEM output:
-SEM_GB21 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_21.rds") %>%
-  mutate(water_year=2021)
 
-SEM_GB22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22.rds") %>%
+SEM_GB22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22_GPP_logflow.rds") %>%
   mutate(water_year=2022)
 
-SEM_GB23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23.rds") %>%
+SEM_GB23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23_GPP_logflow.rds") %>%
   mutate(water_year=2023)
 
 
 ## SSNS SEM output:
-SEM_SS22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_22.rds") %>%
+SEM_SS22 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_22_finalv2.rds") %>%
   mutate(water_year=2022)
 
-SEM_SS23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_23.rds") %>%
+SEM_SS23 <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_23_finalv2.rds") %>%
   mutate(water_year=2023)
 
 ```
 
 
-
-```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
-# 
-# SEM_df_GPP_22 <- rbind(SEM_BW22, SEM_GB22, SEM_SS22)
-# 
-# ci_summary_overall <- SEM_df_GPP_22 %>%
-#   dplyr::group_by(Coefficient, shore, water_year) %>%
-#   dplyr:: summarize(
-#     mean = mean(Estimate),
-#     l_95 = quantile(Estimate, 0.025),
-#     u_95 = quantile(Estimate, 0.975),
-#     .groups = "drop"
-#   )
-# 
-# 
-# coef_order <- c(
-#   "b_plotGPP_plot_GPP_lag",
-#   "b_plotGPP_lake_tempC",
-#   "b_plotGPP_light_mean",
-#   "b_plotGPP_flow_mean",
-#   "b_laketempC_flow_mean",
-#   "b_laketempC_ppt_mm",
-#   "b_lightmean_flow_mean",
-#   "b_lightmean_ppt_mm"
-# )
-# 
-# ci_summary_overall1 <- ci_summary_overall %>%
-#   mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
-# 
-# 
-# # coefficient plot
-# coef_plot_gpp_22 <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, color = shore, shape=shore)) +
-#   geom_point(position = position_dodge(width = 0.6), size = 2.5) +
-#   geom_errorbarh(aes(xmin = l_95, xmax = u_95),
-#                  position = position_dodge(width = 0.6), height = 0) +
-#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
-#   scale_color_manual(name = "Shore", values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
-#   theme_minimal() +
-#   xlim(-5.25, 1.40) +
-#   labs(
-#     x = NULL,
-#     y = "Water year 2022",
-#     title = "GPP",
-#   ) +
-#   theme(
-#     axis.text.y = element_text(size = 10),
-#     legend.position = "right"
-#   )  + scale_y_discrete(labels = c(
-#     "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
-#     "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
-#     "b_plotGPP_light_mean" = "Metab. ~ Light",
-#     "b_plotGPP_flow_mean" = "Metab. ~ Flow",
-#     "b_laketempC_flow_mean" = "Temp ~ Flow",
-#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
-#     "b_lightmean_flow_mean" = "Light ~ Flow",
-#     "b_lightmean_ppt_mm" = "Light ~ PPT"
-#   ))
-# 
-# coef_plot_gpp_22
-
-```
-
-
-```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
-# 
-# SEM_df_GPP_23 <- rbind(SEM_BW23, SEM_GB23, SEM_SS23)
-# 
-# ci_summary_overall <- SEM_df_GPP_23 %>%
-#   dplyr::group_by(Coefficient, shore, water_year) %>%
-#   dplyr:: summarize(
-#     mean = mean(Estimate),
-#     l_95 = quantile(Estimate, 0.025),
-#     u_95 = quantile(Estimate, 0.975),
-#     .groups = "drop"
-#   )
-# 
-# 
-# coef_order <- c(
-#   "b_plotGPP_plot_GPP_lag",
-#   "b_plotGPP_lake_tempC",
-#   "b_plotGPP_light_mean",
-#   "b_plotGPP_flow_mean",
-#   "b_laketempC_flow_mean",
-#   "b_laketempC_ppt_mm",
-#   "b_lightmean_flow_mean",
-#   "b_lightmean_ppt_mm"
-# )
-# 
-# ci_summary_overall1 <- ci_summary_overall %>%
-#   mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
-# 
-# 
-# # coefficient plot
-# coef_plot_gpp_23 <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, color = shore, shape=shore)) +
-#   geom_point(position = position_dodge(width = 0.6), size = 2.5) +
-#   geom_errorbarh(aes(xmin = l_95, xmax = u_95),
-#                  position = position_dodge(width = 0.6), height = 0) +
-#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
-#   scale_color_manual(name = "Shore", values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
-#   theme_minimal() +
-#   xlim(-5.25, 1.40) +
-#   labs(
-#     x = "Estimate (posterior mean ± 95% CI)",
-#     y = "Water year 2023",
-#   ) +
-#   theme(
-#     axis.text.y = element_text(size = 10),
-#     legend.position = "right"
-#   )  + scale_y_discrete(labels = c(
-#     "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
-#     "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
-#     "b_plotGPP_light_mean" = "Metab. ~ Light",
-#     "b_plotGPP_flow_mean" = "Metab. ~ Flow",
-#     "b_laketempC_flow_mean" = "Temp ~ Flow",
-#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
-#     "b_lightmean_flow_mean" = "Light ~ Flow",
-#     "b_lightmean_ppt_mm" = "Light ~ PPT"
-#   ))
-# 
-# coef_plot_gpp_23
-
-```
-
-```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=8, fig.height=6}
-
-# SEM_GPP_grid <- ggarrange(
-#   coef_plot_gpp_22,
-#   coef_plot_gpp_23,
-#  # labels = c("a", "b"),
-#   align=c("v"),
-#   #label.x = 0.1, 
-#   #label.y = 1, 
-#  common.legend = T,
-#    legend = "bottom",
-#   hjust = 1,  
-#   vjust = 1,  
-#   ncol = 1, nrow = 2) 
-# 
-# SEM_GPP_grid
-
-```
-
-
-
-```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=8, fig.height=6}
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=9, fig.height=5}
 
 SEM_df_GPP_comb <- rbind(SEM_BW22, SEM_GB22, SEM_SS22, 
                          SEM_BW23, SEM_GB23, SEM_SS23)
@@ -719,7 +523,19 @@ SEM_df_GPP_comb <- rbind(SEM_BW22, SEM_GB22, SEM_SS22,
 ci_summary_overall <- SEM_df_GPP_comb %>%
   dplyr::group_by(Coefficient, shore, water_year) %>%
   dplyr:: summarize(
-    mean = mean(Estimate),
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+# write_csv(ci_summary_overall, "/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/SEM_summary/SEM_CI_GPP_logflow.csv")
+
+
+ci_summary_overallT <- SEM_df_GPP_comb %>%
+  dplyr::group_by(Coefficient, water_year) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
     l_95 = quantile(Estimate, 0.025),
     u_95 = quantile(Estimate, 0.975),
     .groups = "drop"
@@ -734,7 +550,8 @@ coef_order <- c(
   "b_laketempC_flow_mean",
   "b_laketempC_ppt_mm",
   "b_lightmean_flow_mean",
-  "b_lightmean_ppt_mm"
+  "b_lightmean_ppt_mm",
+  "b_flowmean_ppt_mm"
 )
 
 ci_summary_overall1 <- ci_summary_overall %>%
@@ -754,36 +571,74 @@ ci_summary_overall1 <- ci_summary_overall1 %>%
     TRUE ~ "Other"
   ))
 
-####
-coef_plot_gpp <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient, 
-                                                 color = point_shape, shape = point_shape)) +
-  geom_point(position = position_dodge(width = 0.5), size = 3, alpha=0.9) +
-  geom_errorbarh(aes(xmin = l_95, xmax = u_95),
-                 position = position_dodge(width = 0.5), height = 0, alpha=0.45) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
-  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
-  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
-  scale_color_manual(name = "Shore and water year", 
-                     values = c("BW 2022" = "#3283a8", "BW 2023" = "#3283a8",
-                                "GB 2022" = "#a67d17", "GB 2023" = "#a67d17",
-                                "SS 2022" = "#136F63", "SS 2023" = "#136F63")) +
-  
-  scale_shape_manual(name = "Shore and water year",
-                     values = c("BW 2022" = 1, "BW 2023" = 19, 
-                                "GB 2022" = 2, "GB 2023" = 17, 
-                                "SS 2022" = 0, "SS 2023" = 15)) +
+SEM_df_GPP_comb1 <- SEM_df_GPP_comb %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
 
-  theme_minimal() +
-  labs(
-    x = "Estimate (posterior mean ± 95% CI)",
-    y = NULL,
-    title = "GPP"
+
+SEM_df_GPP_comb1 <- SEM_df_GPP_comb1 %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_order)))
+
+levels(SEM_df_GPP_comb1$Coefficient)
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=9, fig.height=5}
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot  <- ggplot(SEM_df_GPP_comb1, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = point_shape,
+  color = point_shape
+)) +
+    geom_violin(
+    width = 2,
+    alpha = 0.85,
+    scale = "width",
+    trim = FALSE,
+    position = position_dodge(width = 0.5)  # Vertically dodges on y-axis
   ) +
+  
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
   theme(
+    legend.position = "right",
     axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+
+  ) +
+    scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+      scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#d3e8f2", "Large inflow wet (WY 2023)" = "#3283a8",
+                                "Small inflow dry (WY 2022)" = "#f5e5bc", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#cce3d6", "No inflow wet (WY 2023)" = "#136F63")) +
+
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "GPP SEM Coefficients"
+  ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 5.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 3.5,  color = "gray40", linetype = "dotted") +
+    geom_hline(yintercept = 1.5,  color = "gray40", linetype = "dotted") +
+
+    theme(
+    axis.text.y = element_text(size = 14),
     legend.position = "right"
   ) +
-  scale_y_discrete(labels = c(
+ # xlim(-0.85,0.85) +
+    theme_minimal() +
+    scale_y_discrete(labels = c(
     "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
     "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
     "b_plotGPP_light_mean" = "Metab. ~ Light",
@@ -791,41 +646,34 @@ coef_plot_gpp <- ggplot(ci_summary_overall1, aes(x = mean, y = Coefficient,
     "b_laketempC_flow_mean" = "Temp ~ Flow",
     "b_laketempC_ppt_mm" = "Temp ~ PPT",
     "b_lightmean_flow_mean" = "Light ~ Flow",
-    "b_lightmean_ppt_mm" = "Light ~ PPT"
-  ))
+    "b_lightmean_ppt_mm" = "Light ~ PPT",
+    "b_flowmean_ppt_mm" = "Flow ~ PPT"
+  )) 
 
-
-coef_plot_gpp
 
 ```
 
 ```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
-## BWNS SEM output:
-SEM_BW21e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_21.rds") %>%
-  mutate(water_year=2021)
 
-SEM_BW22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_22.rds") %>%
+
+SEM_BW22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_22_ER_final_logflow.rds") %>%
   mutate(water_year=2022)
 
-SEM_BW23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_BW_23.rds") %>%
+SEM_BW23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_BW_23_ER_final_logflow.rds") %>%
   mutate(water_year=2023)
 
-## GBNS SEM output:
-SEM_GB21e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_21.rds") %>%
-  mutate(water_year=2021)
-
-SEM_GB22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_22.rds") %>%
+SEM_GB22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_22_ER_final_logflow.rds") %>%
   mutate(water_year=2022)
 
-SEM_GB23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_GB_23.rds") %>%
+SEM_GB23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_GB_23_ER_final_logflow.rds") %>%
   mutate(water_year=2023)
 
 
 ## SSNS SEM output:
-SEM_SS22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_SS_22.rds") %>%
+SEM_SS22e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_ER_22_final_v2.rds") %>%
   mutate(water_year=2022)
 
-SEM_SS23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/ER_posterior_samples_melted_SS_23.rds") %>%
+SEM_SS23e <-readRDS("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/posterior_samples_melted_SS_23_ER_final_v2.rds") %>%
   mutate(water_year=2023)
 
 ```
@@ -840,7 +688,23 @@ SEM_df_ER_comb <- rbind(SEM_BW22e, SEM_GB22e, SEM_SS22e,
 ci_summary_overalle <- SEM_df_ER_comb %>%
   dplyr::group_by(Coefficient, shore, water_year) %>%
   dplyr:: summarize(
-    mean = mean(Estimate),
+    median = median(Estimate),
+    l_95 = quantile(Estimate, 0.025),
+    u_95 = quantile(Estimate, 0.975),
+    .groups = "drop"
+  )
+
+summary(SEM_df_ER_comb)
+
+
+# write_csv(ci_summary_overalle, "/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/SEM_output/SEM_summary/SEM_CI_ER_logflow.csv")
+
+
+
+ci_summary_overall_T <- SEM_df_ER_comb %>%
+  dplyr::group_by(Coefficient, water_year) %>%
+  dplyr:: summarize(
+    median = median(Estimate),
     l_95 = quantile(Estimate, 0.025),
     u_95 = quantile(Estimate, 0.975),
     .groups = "drop"
@@ -855,8 +719,10 @@ coef_ordere <- c(
   "b_laketempC_flow_mean",
   "b_laketempC_ppt_mm",
   "b_lightmean_flow_mean",
-  "b_lightmean_ppt_mm"
+  "b_lightmean_ppt_mm",
+  "b_flowmean_ppt_mm"
 )
+
 
 ci_summary_overall1e<- ci_summary_overalle %>%
   mutate(Coefficient = fct_relevel(Coefficient, rev(coef_ordere)))
@@ -875,8 +741,44 @@ ci_summary_overall1e <- ci_summary_overall1e %>%
     TRUE ~ "Other"
   ))
 
+
+
+ci_summary_overall1 <- ci_summary_overall1 %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "BW 2022",
+    shore == "BW" & water_year == 2023 ~ "BW 2023",
+    shore == "GB" & water_year == 2022 ~ "GB 2022",
+    shore == "GB" & water_year == 2023 ~ "GB 2023",
+    shore == "SS" & water_year == 2022 ~ "SS 2022",
+    shore == "SS" & water_year == 2023 ~ "SS 2023",
+    TRUE ~ "Other"
+  ))
+
+SEM_df_ER_comb1 <- SEM_df_ER_comb %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
+
+
+SEM_df_ER_comb1 <- SEM_df_ER_comb1 %>%
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_ordere)))
+
+levels(SEM_df_GPP_comb1$Coefficient)
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=8, fig.height=6}
+
 ####
-coef_plot_er <- ggplot(ci_summary_overall1e, aes(x = mean, y = Coefficient, 
+coef_plot_er <- ggplot(ci_summary_overall1e, aes(x = median, y = Coefficient, 
                                                  color = point_shape, shape = point_shape)) +
   geom_point(position = position_dodge(width = 0.5), size = 3, alpha=0.9) +
   geom_errorbarh(aes(xmin = l_95, xmax = u_95),
@@ -896,47 +798,403 @@ coef_plot_er <- ggplot(ci_summary_overall1e, aes(x = mean, y = Coefficient,
 
   theme_minimal() +
   labs(
-    x = "Estimate (posterior mean ± 95% CI)",
+    x = "Posterior median ± 95% CI",
     y = NULL,
-    title = "ER"
+    title = "|ER|"
   ) +
   theme(
     axis.text.y = element_text(size = 10),
     legend.position = "right"
   ) + scale_y_discrete(labels=NULL)
-# +
-#   scale_y_discrete(labels = c(
-#     "b_plotER_plot_ER_lag" = "Metab. ~ AR",
-#     "b_plotER_lake_tempC" = "Metab. ~ Temp.",
-#     "b_plotER_light_mean" = "Metab. ~ Light",
-#     "b_plotER_flow_mean" = "Metab. ~ Flow",
-#     "b_laketempC_flow_mean" = "Temp ~ Flow",
-#     "b_laketempC_ppt_mm" = "Temp ~ PPT",
-#     "b_lightmean_flow_mean" = "Light ~ Flow",
-#     "b_lightmean_ppt_mm" = "Light ~ PPT"
-#   ))
-
 
 coef_plot_er
+
+#####
+
+
+SEM_df_ER_comb <- SEM_df_ER_comb%>% 
+  mutate(Coefficient = fct_relevel(Coefficient, rev(coef_ordere))) %>%
+  mutate(point_shape = case_when(
+    shore == "BW" & water_year == 2022 ~ "Large inflow dry (WY 2022)",
+    shore == "BW" & water_year == 2023 ~ "Large inflow wet (WY 2023)",
+    shore == "GB" & water_year == 2022 ~ "Small inflow dry (WY 2022)",
+    shore == "GB" & water_year == 2023 ~ "Small inflow wet (WY 2023)",
+    shore == "SS" & water_year == 2022 ~ "No inflow dry (WY 2022)",
+    shore == "SS" & water_year == 2023 ~ "No inflow wet (WY 2023)",
+    TRUE ~ "Other"
+  ))
+
+
+
+SEM_df_ER_comb$point_shape <- factor(
+  SEM_df_ER_comb$point_shape,
+  levels = c(
+    "No inflow wet (WY 2023)",
+    "No inflow dry (WY 2022)",
+    "Small inflow wet (WY 2023)",
+    "Small inflow dry (WY 2022)",
+    "Large inflow wet (WY 2023)",
+    "Large inflow dry (WY 2022)" # draw last = appear on top
+  )
+)
+
+
+#
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot_ER_fac <- ggplot(SEM_df_ER_comb1, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = point_shape,
+  color = point_shape
+)) +
+  geom_violin(
+  width = 0.5,
+  alpha = 0.85,
+  scale = "width",
+  trim = FALSE,
+  position = position_identity()
+)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+
+  ) +
+    scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+      scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#d3e8f2", "Large inflow wet (WY 2023)" = "#3283a8",
+                                "Small inflow dry (WY 2022)" = "#f5e5bc", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#cce3d6", "No inflow wet (WY 2023)" = "#136F63")) +
+
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "ER SEM Coefficients"
+  ) +
+   # xlim(-0.85,0.85) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+    theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  )  + scale_y_discrete(labels=NULL) +
+    theme_minimal() + facet_grid(.~shore)
+  #   +
+  # scale_y_discrete(labels = c(
+  #   "b_plotER_plot_ER_lag" = "Metab. ~ AR",
+  #   "b_plotER_lake_tempC" = "Metab. ~ Temp.",
+  #   "b_plotER_light_mean" = "Metab. ~ Light",
+  #   "b_plotER_flow_mean" = "Metab. ~ Flow",
+  #   "b_laketempC_flow_mean" = "Temp ~ Flow",
+  #   "b_laketempC_log_ppt_mm_z" = "Temp ~ PPT",
+  #   "b_lightmean_flow_mean" = "Light ~ Flow",
+  #   "b_lightmean_log_ppt_mm_z" = "Light ~ PPT"
+  # )) 
+
+
+
+
+#
+# Violin plot of Estimate distributions per Coefficient
+coef_violin_plot_ER <- ggplot(SEM_df_ER_comb, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = point_shape,
+  color = point_shape
+)) +
+  geom_violin(
+  width = 0.5,
+  alpha = 0.85,
+  scale = "width",
+  trim = FALSE,
+  position = position_identity()
+)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5)
+
+  ) +
+    scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+      scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#d3e8f2", "Large inflow wet (WY 2023)" = "#3283a8",
+                                "Small inflow dry (WY 2022)" = "#f5e5bc", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#cce3d6", "No inflow wet (WY 2023)" = "#136F63")) +
+
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "ER SEM Coefficients"
+  ) +
+   # xlim(-0.85,0.85) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+    theme(
+    axis.text.y = element_text(size = 10),
+    legend.position = "right"
+  )  + scale_y_discrete(labels=NULL) +
+    theme_minimal() 
+
+
+
+coef_violin_plot_ER <- ggplot(SEM_df_ER_comb1, aes(
+  y = Coefficient,
+  x = Estimate,
+  fill = point_shape,
+  color = point_shape,
+  group = interaction(Coefficient, point_shape)  # This groups violins for dodging
+)) +
+  geom_violin(
+    width = 2,
+    alpha = 0.85,
+    scale = "width",
+    trim = FALSE,
+    position = position_dodge(width = 0.5)  # Vertically dodges on y-axis
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    axis.text.y = element_text(size = 14),
+    plot.title = element_text(hjust = 0.5)
+  ) +
+  scale_color_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#216c8f", "Large inflow wet (WY 2023)" = "#216c8f",
+                                "Small inflow dry (WY 2022)" = "#a67d17", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#09573e", "No inflow wet (WY 2023)" = "#09573e")) +
+  scale_fill_manual(name = "Flow regime and water year", 
+                     values = c("Large inflow dry (WY 2022)" = "#d3e8f2", "Large inflow wet (WY 2023)" = "#3283a8",
+                                "Small inflow dry (WY 2022)" = "#f5e5bc", "Small inflow wet (WY 2023)" = "#a67d17",
+                                "No inflow dry (WY 2022)" = "#cce3d6", "No inflow wet (WY 2023)" = "#136F63")) +
+  labs(
+    x = "Estimate",
+    y = NULL,
+    title = "ER SEM Coefficients"
+  ) +
+  geom_hline(yintercept = 5.5, color = "gray40", linetype = "dotted") +
+  geom_hline(yintercept = 3.5, color = "gray40", linetype = "dotted") +
+    geom_hline(yintercept = 1.5, color = "gray40", linetype = "dotted") +
+
+  scale_y_discrete(labels = NULL)
+
+
+
+
+```
+
+### Part of revised Figure 3 
+
+The DAG is drawn in power point. 
+
+#### SEM as coeff plot:
+Draft with both GPP and ER
+
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=15, fig.height=7}
+
+SEM_grid <- ggarrange(
+  coef_violin_plot,
+  coef_violin_plot_ER,
+  #labels = c("b", "c"),
+ # align=c("v"),
+ # label.x = 0.9,
+  #label.y = 1,
+ common.legend = T,
+   legend = "bottom",
+ # hjust = 0.1,
+  #vjust = 1,
+  widths = c(1, 0.85),
+  ncol = 2, nrow = 1)
+
+SEM_grid
+
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Revised_coeff_Fig3_v2_logflow.png", plot = SEM_grid, width = 8, height = 6, units = "in")
 
 ```
 
 
 
-```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=8, fig.height=6}
+#### SEM as coeff shore faceted plot:
+Draft with both GPP and ER
+
+```{r, warning=F, size = 'small', echo=FALSE, include=T, fig.width=15, fig.height=7}
 
 SEM_grid <- ggarrange(
-  coef_plot_gpp,
-  coef_plot_er,
+  coef_violin_plot_fac,
+  coef_violin_plot_ER_fac,
+  #labels = c("b", "c"),
+ # align=c("v"),
+ # label.x = 0.9,
+  #label.y = 1,
+ common.legend = T,
+   legend = "bottom",
+ # hjust = 0.1,
+  #vjust = 1,
+  widths = c(1, 0.85),
+  ncol = 2, nrow = 1)
+
+SEM_grid
+
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Revised_coeff_Fig3_faceted.png", plot = SEM_grid, width = 12, height = 4.5, units = "in")
+
+```
+
+
+
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=8, fig.height=6}
+library(ggridges)
+
+### SEM as density plot 
+
+# Reorder Coefficients for plotting
+SEM_df_GPP_comb <- SEM_df_GPP_comb %>%
+  mutate(
+    Coefficient = fct_relevel(Coefficient, rev(coef_order)),
+    point_shape = case_when(
+      shore == "BW" & water_year == 2022 ~ "BW 2022",
+      shore == "BW" & water_year == 2023 ~ "BW 2023",
+      shore == "GB" & water_year == 2022 ~ "GB 2022",
+      shore == "GB" & water_year == 2023 ~ "GB 2023",
+      shore == "SS" & water_year == 2022 ~ "SS 2022",
+      shore == "SS" & water_year == 2023 ~ "SS 2023",
+      TRUE ~ "Other"
+    )
+  )
+
+
+ridge_plot <- ggplot(SEM_df_GPP_comb, aes(x = Estimate, y = Coefficient, 
+                                          fill = point_shape, color = point_shape)) +
+  geom_density_ridges(scale = 0.75, alpha = 0.75, linewidth = 0.3, panel_scaling = TRUE) +
+  scale_fill_manual(name = "Shore and water year", 
+                    values = c("BW 2022" = "#3283a8", "BW 2023" = "white",
+                               "GB 2022" = "#a67d17", "GB 2023" = "white",
+                               "SS 2022" = "#136F63", "SS 2023" = "white")) +
+  scale_color_manual(name = "Shore and water year", 
+                     values = c("BW 2022" = "#3283a8", "BW 2023" = "#3283a8",
+                                "GB 2022" = "#a67d17", "GB 2023" = "#a67d17",
+                                "SS 2022" = "#136F63", "SS 2023" = "#136F63")) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+ # geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  #geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+  theme_minimal() +
+  labs(
+    x = "Estimate posterior",
+    y = NULL,
+    title = "GPP"
+  ) +
+  xlim(-4,1.3) +
+  theme(
+    axis.text.y = element_text(size = 8),
+    axis.text.x = element_text(size = 8),
+          axis.title.x = element_text(size = 8),
+              axis.title.y = element_text(size = 8),
+    legend.position = "right"
+  ) +
+  scale_y_discrete(labels = c(
+    "b_plotGPP_plot_GPP_lag" = "Metab. ~ AR",
+    "b_plotGPP_lake_tempC" = "Metab. ~ Temp.",
+    "b_plotGPP_light_mean" = "Metab. ~ Light",
+    "b_plotGPP_flow_mean" = "Metab. ~ Flow",
+    "b_laketempC_flow_mean" = "Temp ~ Flow",
+    "b_laketempC_ppt_mm" = "Temp ~ PPT",
+    "b_lightmean_flow_mean" = "Light ~ Flow",
+    "b_lightmean_ppt_mm" = "Light ~ PPT"
+  ))
+
+
+ridge_plot
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=5, fig.height=6}
+# Reorder Coefficients for plotting
+SEM_df_ER_comb <- SEM_df_ER_comb %>%
+  mutate(
+    Coefficient = fct_relevel(Coefficient, rev(coef_ordere)),
+    point_shape = case_when(
+      shore == "BW" & water_year == 2022 ~ "BW 2022",
+      shore == "BW" & water_year == 2023 ~ "BW 2023",
+      shore == "GB" & water_year == 2022 ~ "GB 2022",
+      shore == "GB" & water_year == 2023 ~ "GB 2023",
+      shore == "SS" & water_year == 2022 ~ "SS 2022",
+      shore == "SS" & water_year == 2023 ~ "SS 2023",
+      TRUE ~ "Other"
+    )
+  )
+
+
+library(ggridges)
+
+ER_ridge_plot <- ggplot(SEM_df_ER_comb, aes(x = Estimate, y = Coefficient, 
+                                          fill = point_shape, color = point_shape)) +
+  geom_density_ridges(scale = 0.75, alpha = 0.75, linewidth = 0.3, panel_scaling = TRUE) +
+  scale_fill_manual(name = "Shore and water year", 
+                    values = c("BW 2022" = "#3283a8", "BW 2023" = "white",
+                               "GB 2022" = "#a67d17", "GB 2023" = "white",
+                               "SS 2022" = "#136F63", "SS 2023" = "white")) +
+  scale_color_manual(name = "Shore and water year", 
+                     values = c("BW 2022" = "#3283a8", "BW 2023" = "#3283a8",
+                                "GB 2022" = "#a67d17", "GB 2023" = "#a67d17",
+                                "SS 2022" = "#136F63", "SS 2023" = "#136F63")) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+ # geom_hline(yintercept = 4.5, color = "gray40", linetype = "dotted") +
+  #geom_hline(yintercept = 2.5,  color = "gray40", linetype = "dotted") +
+  theme_minimal() +
+  labs(
+    x = "Estimate posterior",
+    y = NULL,
+    title = "|ER|"
+  ) +
+    xlim(-4,1.3) +
+  theme(
+    axis.text.y = element_text(size = 8),
+    legend.position = "right"
+  ) +
+    theme(
+    axis.text.x = element_text(size = 8),
+      axis.title.x = element_text(size = 8),
+    legend.position = "right") + scale_y_discrete(labels=NULL)
+
+ER_ridge_plot
+
+```
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=10, fig.height=7}
+
+SEM_grid <- ggarrange(
+  ridge_plot,
+  ER_ridge_plot,
  # labels = c("a", "b"),
-  align=c("v"),
+ # align=c("v"),
   #label.x = 0.1,
   #label.y = 1,
  common.legend = T,
    legend = "bottom",
-  hjust = 0.1,
-  vjust = 1,
-  ncol = 2, nrow = 1)
+  #hjust = 0.1,
+  #vjust = 1,
+ widths = c(1, 0.65),
+ ncol = 2, nrow = 1)
 
 SEM_grid
 
@@ -945,40 +1203,2351 @@ SEM_grid
 
 
 
-```{r, warning=F, size = 'small', echo=FALSE, include=FALSE}
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Revised_Fig3.png", plot = SEM_grid, width = 4.5, height = 5, units = "in")
+
+```
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=5, fig.height=6}
+
+#### Supplemental figures:
+
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_BW <- dat %>%
+  filter(shore == "BW")
+
+summary(GPP_df_BW)
+# date range 2021-06-11  to 2023-09-14   
+
+
+BW_GPP_df21 <- GPP_df_BW %>%
+  filter(date > as.Date("2021-06-10") & date < as.Date("2021-09-10"))
+
+summary(BW_GPP_df21)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO <- GPP_df_BW %>%
+  filter(!is.na(lake_DO)) %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         yday=yday(date),
+         year=year(date))
+
+# Identify the unique yday values for each year
+yday_2021 <- unique(plot_data_DO$yday[plot_data_DO$year == 2021])
+yday_2022 <- unique(plot_data_DO$yday[plot_data_DO$year == 2022])
+yday_2023 <- unique(plot_data_DO$yday[plot_data_DO$year == 2023])
+
+# Find the common yday values across all three years
+common_yday <- Reduce(intersect, list(#yday_2021, 
+                                      yday_2022, 
+                                      yday_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_BW_d <- plot_data_DO %>%
+  filter(yday %in% common_yday & year %in% c(2022, 2023))
+
+filtered_data_BW_cs <- filtered_data_BW_d%>%
+  arrange(year, yday) %>%
+  group_by(year) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP))
+
+# Determine the date range
+date_range <- range(plot_data_DO$date, na.rm = TRUE)
+
+
+# Create the number line plot
+templt_BW <- ggplot(plot_data_DO, aes(x = date)) +
+  #geom_segment(aes(x = date_range[1], xend = date_range[2], y = 0, yend = 0), linewidth = 0.2) + # Main line
+  geom_point(data = filter(plot_data_DO, has_do), aes(y = 0.095), alpha=0.8, color = "black", size = 1) + 
+  geom_point(data = filter(filtered_data_BW_d, has_GPP), aes(y = 0.090), alpha= 0.8, color = "#579467", size = 1) + 
+  scale_y_continuous(name = "", breaks = NULL) +
+  theme_classic() + xlab(NULL) +
+  scale_x_date(date_breaks = "8 week",date_labels = "%b-%y", limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))) +
+  labs(title = "BW NS1-3 metab.") #+facet_grid(year~.)
+
+```
+
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=5, fig.height=6}
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_GB <- dat%>%
+  filter(shore == "GB")
+
+summary(GPP_df_GB)
+# date range 2021-06-11  to 2023-09-14   
+
+
+GB_GPP_df21 <- GPP_df_GB %>%
+  filter(date > as.Date("2021-06-10") & date < as.Date("2021-09-10"))
+
+summary(GB_GPP_df21)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO <- GPP_df_GB %>%
+  filter(!is.na(lake_DO)) %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         yday=yday(date),
+         year=year(date))
+
+# Identify the unique yday values for each year
+yday_2021 <- unique(plot_data_DO$yday[plot_data_DO$year == 2021])
+yday_2022 <- unique(plot_data_DO$yday[plot_data_DO$year == 2022])
+yday_2023 <- unique(plot_data_DO$yday[plot_data_DO$year == 2023])
+
+# Find the common yday values across all three years
+common_yday <- Reduce(intersect, list(#yday_2021, 
+                                      yday_2022, 
+                                      yday_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_GB_d <- plot_data_DO %>%
+  filter(yday %in% common_yday & year %in% c(2022, 2023))
+
+filtered_data_cs <- filtered_data%>%
+  arrange(year, yday) %>%
+  group_by(year) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP))
+
+# Determine the date range
+date_range <- range(plot_data_DO$date, na.rm = TRUE)
+
+
+# Create the number line plot
+templt_GB <- ggplot(plot_data_DO, aes(x = date)) +
+  #geom_segment(aes(x = date_range[1], xend = date_range[2], y = 0, yend = 0), linewidth = 0.2) + # Main line
+  geom_point(data = filter(plot_data_DO, has_do), aes(y = 0.095), alpha=0.8, color = "black", size = 1) + # DO presence tick marks
+  geom_point(data = filter(filtered_data_GB_d, has_GPP), aes(y = 0.090), alpha= 0.8, color = "#579467", size = 1) + # GPP presence tick marks
+  scale_y_continuous(name = "", breaks = NULL) +
+    scale_x_date(date_breaks = "8 week",date_labels = "%b-%y", limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))) +
+  theme_classic() + xlab(NULL) +
+  labs(title = "GB NS1-3 metab.") #+facet_grid(year~.)
+
+```
+
+
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=5, fig.height=6}
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_SS <- dat%>%
+  filter(shore == "SS")
+
+summary(GPP_df_SS)
+# date range 2021-06-11  to 2023-09-14   
+
+
+SS_GPP_df21 <- GPP_df_SS %>%
+  filter(date > as.Date("2021-06-10") & date < as.Date("2021-09-10"))
+
+summary(SS_GPP_df21)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO <- GPP_df_SS %>%
+  filter(!is.na(lake_DO)) %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         yday=yday(date),
+         year=year(date))
+
+# Identify the unique yday values for each year
+yday_2021 <- unique(plot_data_DO$yday[plot_data_DO$year == 2021])
+yday_2022 <- unique(plot_data_DO$yday[plot_data_DO$year == 2022])
+yday_2023 <- unique(plot_data_DO$yday[plot_data_DO$year == 2023])
+
+# Find the common yday values across all three years
+common_yday <- Reduce(intersect, list(#yday_2021, 
+                                      yday_2022, 
+                                      yday_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_SS_d <- plot_data_DO %>%
+  filter(yday %in% common_yday & year %in% c(2022, 2023))
+
+filtered_data_cs <- filtered_data%>%
+  arrange(year, yday) %>%
+  group_by(year) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP))
+
+# Determine the date range
+date_range <- range(plot_data_DO$date, na.rm = TRUE)
+
+
+# Create the number line plot
+templt_SS <- ggplot(plot_data_DO, aes(x = date)) +
+  #geom_segment(aes(x = date_range[1], xend = date_range[2], y = 0, yend = 0), linewidth = 0.2) + # Main line
+  geom_point(data = filter(plot_data_DO, has_do), aes(y = 0.095), alpha=0.8, color = "black", size = 1) + # DO presence tick marks
+  geom_point(data = filter(filtered_data_SS_d, has_GPP), aes(y = 0.090), alpha= 0.8, color = "#579467", size = 1) + # GPP presence tick marks
+  scale_y_continuous(name = "", breaks = NULL) +
+  theme_classic() + xlab(NULL) +
+    scale_x_date(
+       limits = c(as.Date("2021-09-29"), as.Date("2023-10-01")),
+      date_breaks = "8 week", date_labels = "%b-%y") +
+  labs(title = "SS NS1 & 2 metab.") #+facet_grid(year~.)
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=FALSE, include=F, fig.width=5, fig.height=6}
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_SH <- dat%>%
+  filter(shore == "SH")
+
+summary(GPP_df_SH)
+# date range 2021-06-11  to 2023-09-14   
+
+
+SH_GPP_df21 <- GPP_df_SH %>%
+  filter(date > as.Date("2021-06-10") & date < as.Date("2021-09-10"))
+
+summary(SH_GPP_df21)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO <- GPP_df_SH %>%
+  filter(!is.na(lake_DO)) %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         yday=yday(date),
+         year=year(date))
+
+# Identify the unique yday values for each year
+yday_2021 <- unique(plot_data_DO$yday[plot_data_DO$year == 2021])
+yday_2022 <- unique(plot_data_DO$yday[plot_data_DO$year == 2022])
+yday_2023 <- unique(plot_data_DO$yday[plot_data_DO$year == 2023])
+
+# Find the common yday values acroSH all three years
+common_yday <- Reduce(intersect, list(#yday_2021, 
+                                      yday_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_SH_d <- plot_data_DO %>%
+  filter(yday %in% common_yday & year %in% c(2023))
+
+filtered_data_cs <- filtered_data%>%
+  arrange(year, yday) %>%
+  group_by(year) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP))
+
+# Determine the date range
+date_range <- range(plot_data_DO$date, na.rm = TRUE)
+
+
+# Create the number line plot
+templt_SH <- ggplot(plot_data_DO, aes(x = date)) +
+  #geom_segment(aes(x = date_range[1], xend = date_range[2], y = 0, yend = 0), linewidth = 0.2) + # Main line
+  geom_point(data = filter(plot_data_DO, has_do), aes(y = 0.095), alpha=0.8, color = "black", size = 1) + # DO presence tick marks
+  geom_point(data = filter(filtered_data_SH_d, has_GPP), aes(y = 0.090), alpha= 0.8, color = "#579467", size = 1) + # GPP presence tick marks
+  scale_y_continuous(name = "", breaks = NULL) +
+  theme_classic() + xlab(NULL) +
+      scale_x_date(
+       limits = c(as.Date("2021-09-29"), as.Date("2023-10-01")),
+      date_breaks = "8 week", date_labels = "%b-%y") +
+  labs(title = "SH NS1-3 metab.") #+facet_grid(year~.)
+
+```
+
+
+#### Supplemental figures:
+
+Overlapping observations of DO (black) and metabolism estimates (green).
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=8, fig.height=3.5}
+
+SEM_grid <- ggarrange(
+  templt_BW,
+  templt_GB,
+  templt_SS,
+  templt_SH,
+ # align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+  #hjust = 0.1,
+  #vjust = 1,
+ ncol = 1, nrow = 4)
+
+SEM_grid
+
+```
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Sup_Fig_nearshore_dat_resolution.png", plot = SEM_grid, width = 7, height = 3.25, units = "in")
+
+```
+
+
+### Question 2
+
+How does ecosystem metabolism and environmental conditions in the nearshore of the lake change between paired locations with and without stream inflows?
+
+
+#### Looking into the shore differences in metabolism between shores near and far from streams:
+
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+
+dat <-readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_analysis_dat.rds") %>%
+  mutate(middle_ER_ab = c(middle_ER*-1))
+
+
+chem_dat <- readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_chem_dat.rds")
+unique(chem_dat$site)
+summary(chem_dat) 
+
+OM_dat <- read.csv("/Users/kellyloria/Documents/UNR/MSMmetab/Sediment_OM_dat.csv") %>%
+  mutate(date=as.Date(date, format("%m/%d/%y"))) %>%
+  filter(Site=="GB_NS1" | Site=="GB_NS2" | Site=="GB_NS3" |
+           Site=="BWNS1" |  Site=="BWNS2" | Site=="BWNS3" |
+           Site=="SSNS1" |  Site=="SSNS2" | Site=="SSNS3" |
+           Site=="SHNS1" |  Site=="SHNS2" | Site=="SHNS3") %>%
+  dplyr::group_by(shore, date) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE))
+
+pdat <-dat %>%
+  dplyr::select(-X, -Latitude, -Longitude, elevation_m) %>%  # drop the 'date' column
+  left_join(chem_dat, by=c("date", "shore", "site", "WaterYear")) %>%
+  left_join(OM_dat, by=c("date", "shore"))
+
+
+week_dat <- pdat %>%
+  dplyr::select(-yday) %>%  # drop the 'date' column
+  dplyr::group_by(site, shore, week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+```
+
+##### Whole time sieries 
+
+Weekly averages by shore
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=10, fig.height=7}
+TS_plots <- ggplot(week_dat, aes(y = middle_GPP, x = week, color = as.factor(shore), shape=shore)) +
+    geom_point(aes(x = week, y = middle_GPP), size = 2, alpha = 0.75) +
+    geom_smooth(aes(group = as.factor(shore), fill = as.factor(shore)), 
+            se = TRUE, linewidth = 1, method = "gam", formula = y ~ s(x, k = 10), alpha = 0.1)+
+  theme_classic() +
+    scale_fill_manual(name="Shore",
+    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+  scale_color_manual(name="Shore",
+    values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
+  ylim(-5,45) + scale_shape_manual(values = c(SS = 1, BW = 19, GB = 17, SH= 2)) +
+ ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  xlab("Week number") +
+  labs(title="All shores") +facet_grid(WaterYear~.)
+
+TS_plots
+```
+
+2023 overlapping weeks from west shore locations week 3 - 41
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+df_BW_p <- week_dat %>%
+  filter(shore == "BW") %>%
+  filter(year==2023) %>%
+  filter(week>4 & week<41) %>%
+  dplyr::group_by(shore, week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop") %>%
+  mutate(date=as.Date(date))%>%
+  mutate(ER_abs = middle_ER*-1)
+
+
+ df_SS_p <- week_dat %>%
+  filter(shore == "SS") %>%
+   filter(year==2023) %>%
+   filter(week>4 & week<41)  %>%
+   dplyr::group_by(shore, week, WaterYear) %>%
+   dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop") %>%
+     mutate(date=as.Date(date))%>%
+  mutate(ER_abs = middle_ER*-1)
+ 
+```
+
+ 
+```{r, warning=F, echo=FALSE, include=F, fig.width=8, fig.height=3}
+West_TS_plots <- ggplot(week_dat%>%filter(WaterYear==2023), aes(y = middle_GPP, x = date, color = as.factor(shore), shape=shore)) +
+  geom_point(data = df_BW_p, aes(x = date, y = middle_GPP), color = "#3283a8", size = 2) +
+  geom_point(data = df_SS_p, aes(x = date, y = middle_GPP), color = "#136F63", size = 2) +
+  #geom_line(data = df_SS_p, aes(x = week, y = middle_GPP),color = "red") +
+  #scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  scale_x_date(
+  date_breaks = "3 week",
+  date_labels = "%d-%b"
+  #limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))
+  ) +
+ ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  labs(title="West shore") +
+  xlab(NULL) +
+  geom_smooth(data = df_BW_p, 
+              se = TRUE, linewidth = 1, method = "gam", formula = y ~ s(x, k = 10), alpha = 0.1, color="#3283a8", fill="#3283a8") +
+  geom_smooth(data = df_SS_p, 
+              se = TRUE, linewidth = 1, method = "gam", formula = y ~ s(x, k = 10), alpha = 0.1, color="#136F63", fill= "#136F63") +
+  theme_classic() + facet_grid(WaterYear~.)
+
+
+West_TS_plots
+```
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=8, fig.height=3}
+df_GB_p <- week_dat %>%
+  filter(shore == "GB") %>%
+  filter(year==2023) %>%
+  filter(week>5 & week<41)  %>%
+  dplyr::group_by(shore, week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop") %>%
+       mutate(date=as.Date(date))%>%
+  mutate(ER_abs = middle_ER*-1)
+
+df_SH_p <- week_dat %>%
+  filter(shore == "SH") %>%
+  filter(year==2023) %>%
+  filter(week>5 & week<41)  %>%
+  dplyr::group_by(shore, week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")%>%
+       mutate(date=as.Date(date)) %>%
+  mutate(ER_abs = middle_ER*-1)
+
+
+East_TS_plots <- ggplot(week_dat%>%filter(WaterYear==2023), aes(y = (middle_GPP), x = date, color = as.factor(shore), shape=shore)) +
+  geom_point(data = df_GB_p, aes(x = date, y = middle_GPP), color = "#a67d17", size = 2) +
+  geom_point(data = df_SH_p, aes(x = date, y = middle_GPP), color = "#c86640", size = 2) +
+  #scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+   ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+    scale_x_date(
+  date_breaks = "3 week",
+  date_labels = "%d-%b"
+  #limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))
+  ) +
+  labs(title="East shore") +
+  geom_smooth(data = df_GB_p, 
+              se = TRUE, linewidth = 1, method = "gam", formula = y ~ s(x, k = 10), alpha = 0.1, color="#a67d17", fill="#a67d17") +
+  geom_smooth(data = df_SH_p, 
+              se = TRUE, linewidth = 1, method = "gam", formula = y ~ s(x, k = 10), alpha = 0.1, color="#c76640", fill="#c76640") +
+  theme_classic() + facet_grid(WaterYear~.)
+
+East_TS_plots
+
+```
+
+
+
+```{r, warning=F, echo=F, include=F, fig.width=10, fig.height=6}
+
+png("./WY_GPP_panel_plot.png", width = 1550, height = 1250, res = 150)
+
+# Set layout to 2 rows, 1 column
+par(mfrow = c(2, 1),         # 2 rows, 1 column
+    oma = c(1, 1, 1, 1),     # outer margin space
+    mar = c(4, 5, 2, 8))  
+
+# === FIRST PLOT (East shore) ===
+plot(df_GB_p$date, df_GB_p$middle_GPP, type = "p", pch = 16, col = "#a67d17",
+     xaxt = "n", xlab = "", ylab = expression(GPP~(mmol~O[2]~m^-3~d^-1)),
+     ylim = c(-2.5, 25), main = "East shore")
+tick_dates <- seq(from = min(df_GB_p$date), to = max(df_GB_p$date), by = "3 weeks")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_SH_p$date, df_SH_p$middle_GPP, pch = 17, col = "#c86640")
+
+# GAM smooths
+library(mgcv)
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_GB_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SH_p)
+date_seq <- seq(min(df_GB_p$date), max(df_GB_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#a67d17", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#c86640", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#a67d17", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#c86640", alpha.f = 0.2), border = NA)
+
+# Flow and PPT on right
+par(new = TRUE)
+flow_ylim <- rev(range(df_GB_p$flow_mean, na.rm = TRUE) + c(0, 0.75 * diff(range(df_GB_p$flow_mean, na.rm = TRUE))))
+plot(df_GB_p$date, df_GB_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
+
+par(new = TRUE)
+ppt_ylim <- rev(c(0, max(df_GB_p$ppt_mm, na.rm = TRUE)+5))
+plot(df_GB_p$date, df_GB_p$ppt_mm, type = "l", col = "#6fded7", lwd = 3, lty=2,
+     axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+axis(4, at = pretty(df_GB_p$ppt_mm), labels = pretty(df_GB_p$ppt_mm), line = 5.5, col.axis = "#6fded7", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 7.5, col = "#6fded7")
+
+legend("bottomright", inset = c(-0.05, -0.05), xpd = TRUE,
+       legend = c("GB: Small inflow", "SH: No inflow", "Flow", "PPT"), 
+       col = c("#a67d17", "#c86640", "#448ff2", "#6fded7"), 
+       pch = c(16, 17, NA, NA), 
+       lwd = c(NA, NA, 3, 3), 
+       lty = c(NA, NA, 3, 2),
+       y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+# === SECOND PLOT (West shore) ===
+
+# par(oma = c(1, 1, 1, 1),    
+#     mar = c(4, 5, 2, 8))  
+
+plot(df_BW_p$date, df_BW_p$middle_GPP, type = "p", pch = 16, col = "#3283a8",
+     xaxt = "n", xlab = "Date", ylab = expression(GPP~(mmol~O[2]~m^-3~d^-1)),
+     ylim = c(-2.5, 35), main = "West shore")
+tick_dates <- seq(from = min(df_BW_p$date), to = max(df_BW_p$date), by = "3 weeks")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_SS_p$date, df_SS_p$middle_GPP, pch = 17, col = "#136F63")
+
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_BW_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SS_p)
+date_seq <- seq(min(df_BW_p$date), max(df_BW_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#3283a8", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#136F63", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#3283a8", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#136F63", alpha.f = 0.2), border = NA)
+
+par(new = TRUE)
+flow_ylim <- rev(range(df_BW_p$flow_mean, na.rm = TRUE) + c(0, 0.75 * diff(range(df_BW_p$flow_mean, na.rm = TRUE))))
+plot(df_BW_p$date, df_BW_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
+
+par(new = TRUE)
+ppt_ylim <- rev(c(0, max(df_BW_p$ppt_mm, na.rm = TRUE)+5))
+plot(df_BW_p$date, df_BW_p$ppt_mm, type = "l", col = "#6fded7", lwd = 3, lty=2,
+     axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+axis(4, at = pretty(df_BW_p$ppt_mm), labels = pretty(df_BW_p$ppt_mm), line = 5.5, col.axis = "#6fded7", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 7.5, col = "#6fded7")
+
+
+legend("bottomright", inset = c(-0.05, -0.05), xpd = TRUE,
+       legend = c("BW: Large inflow", "SS: No inflow", "Flow", "PPT"), 
+       col = c("#3283a8", "#136F63", "#448ff2", "#6fded7"), 
+       pch = c(16, 17, NA, NA), 
+       lwd = c(NA, NA, 3, 3), 
+       lty = c(NA, NA, 3, 2),
+       y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+
+dev.off()
+```
+
+
+
+
+```{r, warning=F, echo=F, include=F, fig.width=10, fig.height=6}
+
+#png("./WY_Metab_panel_plot.png", width = 1550, height = 1300, res = 150)
+
+# Set layout to 2 rows, 1 column
+par(mfrow = c(2, 1),         # 2 rows, 1 column
+    oma = c(1, 1, 1, 1),     # outer margin space
+    mar = c(4, 5, 2, 8))  
+
+# === FIRST PLOT (East shore) ===
+plot(df_GB_p$date, df_GB_p$middle_GPP, type = "p", pch = 16, col = "#a67d17",
+     xaxt = "n", xlab = "", ylab ="",
+     ylim = c(-12.5, 25), main = "East shore")
+tick_dates <- seq(from = min(df_GB_p$date), to = max(df_GB_p$date), by = "3 weeks")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_GB_p$date, df_GB_p$middle_ER, pch = 1, col = "#a67d17")
+abline(h = 0, col = "black", lwd = 1)
+mtext( expression(Metabolism~(mmol~O[2]~m^-3~d^-1)), side = 2, line = 2, col = "black")
+
+
+
+points(df_SH_p$date, df_SH_p$middle_GPP, pch = 17, col = "#c86640")
+points(df_SH_p$date, df_SH_p$middle_ER, pch = 2, col = "#c86640")
+
+
+# GAM smooths
+library(mgcv)
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_GB_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SH_p)
+date_seq <- seq(min(df_GB_p$date), max(df_GB_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#a67d17", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#c86640", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#a67d17", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#c86640", alpha.f = 0.2), border = NA)
+
+
+gam_gb_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_GB_p)
+gam_sh_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_SH_p)
+date_seq_e <- seq(min(df_GB_p$date), max(df_GB_p$date), by = "1 day")
+pred_gb_e <- predict(gam_gb_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+pred_sh_e <- predict(gam_sh_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+lines(date_seq_e, pred_gb_e$fit, col = "#a67d17", lwd = 2)
+lines(date_seq_e, pred_sh_e$fit, col = "#c86640", lwd = 2)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_gb_e$fit + 2*pred_gb_e$se.fit, rev(pred_gb_e$fit - 2*pred_gb_e$se.fit)),
+        col = adjustcolor("#a67d17", alpha.f = 0.2), border = NA)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_sh_e$fit + 2*pred_sh_e$se.fit, rev(pred_sh_e$fit - 2*pred_sh_e$se.fit)),
+        col = adjustcolor("#c86640", alpha.f = 0.2), border = NA)
+
+
+# Flow and PPT on right
+par(new = TRUE)
+flow_ylim <- rev(range(df_GB_p$flow_mean, na.rm = TRUE) + c(0, 1.25 * diff(range(df_GB_p$flow_mean, na.rm = TRUE))))
+plot(df_GB_p$date, df_GB_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
+
+
+
+par(new = TRUE)
+ppt_max <- max(df_GB_p$ppt_mm, na.rm = TRUE)
+ppt_ylim <- rev(c(0, ppt_max * 2.3))  # or use + fixed offset, e.g., ppt_max + 50
+
+plot(df_GB_p$date, df_GB_p$ppt_mm, type = "l", col = "#6fded7", lwd = 3, lty = 2,
+     axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+
+axis(4,
+     at = pretty(ppt_ylim), 
+     labels = pretty(ppt_ylim),
+     line = 3.75, col.axis = "#6fded7", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 5.75, col = "#6fded7")
+
+
+legend("bottom", inset = c(-0.05, -0.05), xpd = TRUE,
+       legend = c("Small inflow", "No inflow", "Streamflow", "Precipitation"), 
+       col = c("#a67d17", "#c86640", "#448ff2", "#6fded7"), 
+       pch = c(16, 17, NA, NA), 
+       lwd = c(NA, NA, 3, 3), 
+       lty = c(NA, NA, 3, 2),
+       y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+# === SECOND PLOT (West shore) ===
+
+# par(oma = c(1, 1, 1, 1),    
+#     mar = c(4, 5, 2, 8))  
+
+plot(df_BW_p$date, df_BW_p$middle_GPP, type = "p", pch = 16, col = "#3283a8",
+     xaxt = "n", xlab = "Date", ylab = "",
+     ylim = c(-30, 35), main = "West shore")
+tick_dates <- seq(from = min(df_BW_p$date), to = max(df_BW_p$date), by = "3 weeks")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_SS_p$date, df_SS_p$middle_GPP, pch = 17, col = "#136F63")
+points(df_BW_p$date, df_BW_p$middle_ER, pch = 1, col = "#3283a8")
+points(df_SS_p$date, df_SS_p$middle_ER, pch = 2, col = "#136F63")
+abline(h = 0, col = "black", lwd = 1)
+mtext( expression(Metabolism~(mmol~O[2]~m^-3~d^-1)), side = 2, line = 2, col = "black")
+
+
+
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_BW_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SS_p)
+date_seq <- seq(min(df_BW_p$date), max(df_BW_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#3283a8", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#136F63", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#3283a8", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#136F63", alpha.f = 0.2), border = NA)
+
+
+
+
+gam_gb_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_BW_p)
+gam_sh_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_SS_p)
+date_seq_e <- seq(min(df_BW_p$date), max(df_BW_p$date), by = "1 day")
+pred_gb_e <- predict(gam_gb_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+pred_sh_e <- predict(gam_sh_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+lines(date_seq, pred_gb_e$fit, col = "#3283a8", lwd = 2)
+lines(date_seq, pred_sh_e$fit, col = "#136F63", lwd = 2)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_gb_e$fit + 2*pred_gb_e$se.fit, rev(pred_gb_e$fit - 2*pred_gb_e$se.fit)),
+        col = adjustcolor("#3283a8", alpha.f = 0.2), border = NA)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_sh_e$fit + 2*pred_sh_e$se.fit, rev(pred_sh_e$fit - 2*pred_sh_e$se.fit)),
+        col = adjustcolor("#136F63", alpha.f = 0.2), border = NA)
+
+par(new = TRUE)
+flow_ylim <- rev(range(df_BW_p$flow_mean, na.rm = TRUE) + c(0, 1.25 * diff(range(df_BW_p$flow_mean, na.rm = TRUE))))
+plot(df_BW_p$date, df_BW_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
 # 
-# library(ggridges)
-# library(ggplot2)
-# library(dplyr)
+# par(new = TRUE)
+# ppt_ylim <- rev(c(0, max(df_BW_p$ppt_mm, na.rm = TRUE)+15))
+# plot(df_BW_p$date, df_BW_p$ppt_mm, type = "l", col = "#6fded7", lwd = 3, lty=2,
+#      axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+# axis(4, at = pretty(df_BW_p$ppt_mm), labels = pretty(df_BW_p$ppt_mm), line = 5, col.axis = "#6fded7", col = "black")
+# mtext(expression("Precipitation (mm)"), side = 4, line = 7.25, col = "#6fded7")
+
+
+
+
+par(new = TRUE)
+ppt_max <- max(df_BW_p$ppt_mm, na.rm = TRUE)
+ppt_ylim <- rev(c(0, ppt_max * 2.3))  # or use + fixed offset, e.g., ppt_max + 50
+
+plot(df_BW_p$date, df_BW_p$ppt_mm, type = "l", col = "#6fded7", lwd = 3, lty = 2,
+     axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+
+axis(4,
+     at = pretty(ppt_ylim), 
+     labels = pretty(ppt_ylim),
+     line = 3.75, col.axis = "#6fded7", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 5.75, col = "#6fded7")
+
 # 
-# # Optional: Filter out coefficients you don't want
-# SEM_df_GPP_22_filtered <- SEM_df_GPP_22 %>%
-#   filter(!(shore == "SS" & Coefficient %in% c("b_plotGPP_flow_mean", "b_laketempC_flow_mean", "b_lightmean_flow_mean")))
+# legend("bottom", inset = c(-0.05, -0.05), xpd = TRUE,
+#        legend = c("Large inflow", "No inflow", "Streamflow", "Precipitation"), 
+#        col = c("#3283a8", "#136F63", "#448ff2", "#6fded7"), 
+#        pch = c(16, 17, NA, NA), 
+#        lwd = c(NA, NA, 3, 3), 
+#        lty = c(NA, NA, 3, 2),
+#        y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+
+dev.off()
+```
+
+
+
+
+```{r, warning=F, echo=F, include=T, fig.width=10, fig.height=8}
+
+#
+#png("./WY_Metab_panel_plot.png", width = 1550, height = 1250, res = 150)
+
+xlim_range <- as.Date(c("2023-01-30", "2023-09-08"))  # adjust year if needed
+tick_dates <- seq(from = xlim_range[1], to = xlim_range[2], by = "3 weeks")
+
+
+# Set layout to 2 rows, 1 column
+par(mfrow = c(2, 1),         # 2 rows, 1 column
+    oma = c(1, 1, 1, 1),     # outer margin space
+    mar = c(4, 5, 2, 8))  
+
+# === FIRST PLOT (East shore) ===
+plot(df_GB_p$date, df_GB_p$middle_GPP, type = "p", pch = 16, col = "#a67d17",
+     xaxt = "n", xlab = "", ylab = "",
+     ylim = c(-12.5, 25), 
+     xlim = xlim_range, main = "East shore")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_GB_p$date, df_GB_p$middle_ER, pch = 1, col = "#a67d17")
+abline(h = 0, col = "black", lwd = 1)
+mtext( expression(Metabolism~(mmol~O[2]~m^-3~d^-1)), side = 2, line = 1.85, col = "black")
+points(df_SH_p$date, df_SH_p$middle_GPP, pch = 17, col = "#c86640")
+points(df_SH_p$date, df_SH_p$middle_ER, pch = 2, col = "#c86640")
 # 
-# # Plot using ggridges
-# coef_density_plot <- ggplot(SEM_df_GPP_22_filtered, 
-#                             aes(x = Estimate, y = Coefficient, fill = shore, color = shore)) +
-#   ggridges::geom_density_ridges(
-#     scale = 1.5, 
-#     alpha = 0.6,
-#     rel_min_height = 0.05,
-#     color = "black"
-#   ) +
-#   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
-#   scale_fill_manual(values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
-#   scale_color_manual(values = c(SS = "#136F63", BW = "#3283a8", GB = "#a67d17", SH = "#c76640")) +
-#   theme_minimal() +
-#   labs(
-#     x = "Mean posterior estimate and 95% CI",
-#     y = "Water year 2023",
-#   ) +
-#   theme(
-#     axis.text.y = element_text(size = 10),
-#     legend.position = "right"
-#   )
+# arrows(x0 = df_GB_p$date,
+#        y0 = df_GB_p$lower_GPP,
+#        x1 = df_GB_p$date,
+#        y1 = df_GB_p$upper_GPP,
+#        angle = 90, code = 2, length = 0.05, col = "#a67d17")
+
+
+
+# GAM smooths
+library(mgcv)
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_GB_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SH_p)
+date_seq <- seq(min(df_GB_p$date), max(df_GB_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#a67d17", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#c86640", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#a67d17", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#c86640", alpha.f = 0.2), border = NA)
+
+
+gam_gb_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_GB_p)
+gam_sh_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_SH_p)
+date_seq_e <- seq(min(df_GB_p$date), max(df_GB_p$date), by = "1 day")
+pred_gb_e <- predict(gam_gb_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+pred_sh_e <- predict(gam_sh_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+lines(date_seq_e, pred_gb_e$fit, col = "#a67d17", lwd = 2)
+lines(date_seq_e, pred_sh_e$fit, col = "#c86640", lwd = 2)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_gb_e$fit + 2*pred_gb_e$se.fit, rev(pred_gb_e$fit - 2*pred_gb_e$se.fit)),
+        col = adjustcolor("#a67d17", alpha.f = 0.2), border = NA)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_sh_e$fit + 2*pred_sh_e$se.fit, rev(pred_sh_e$fit - 2*pred_sh_e$se.fit)),
+        col = adjustcolor("#c86640", alpha.f = 0.2), border = NA)
+
+
+# Flow and PPT on right
+par(new = TRUE)
+flow_ylim <- rev(range(df_GB_p$flow_mean, na.rm = TRUE) + c(0, 1.5 * diff(range(df_GB_p$flow_mean, na.rm = TRUE))))
+plot(df_GB_p$date, df_GB_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
+
+
+par(new = TRUE)
+ppt_max <- max(df_GB_p$ppt_mm, na.rm = TRUE)
+ppt_ylim <- rev(c(0, ppt_max * 2.85))
+
+plot(df_GB_p$date, df_GB_p$ppt_mm, type = "n", axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+
+# Draw vertical bars for precipitation
+segments(x0 = df_GB_p$date,
+         y0 = 0,
+         x1 = df_GB_p$date,
+         y1 = df_GB_p$ppt_mm,
+         col = "#14c7bb", lwd = 3)
+
+# Right-hand axis
+axis(4,
+     at = pretty(ppt_ylim),
+     labels = pretty(ppt_ylim),
+     line = 3.75, col.axis = "#14c7bb", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 6, col = "#14c7bb")
+
+# legend("bottom", inset = c(-0.05, -0.05), xpd = TRUE,
+#        legend = c("Small inflow", "No inflow", "Streamflow", "Precipitation"), 
+#        col = c("#a67d17", "#c86640", "#448ff2", "#6fded7"), 
+#        pch = c(16, 17, NA, NA), 
+#        lwd = c(NA, NA, 3, 3), 
+#        lty = c(NA, NA, 3, 1),
+#        y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+# === SECOND PLOT (West shore) ===
+
+plot(df_BW_p$date, df_BW_p$middle_GPP, type = "p", pch = 16, col = "#3283a8",
+     xaxt = "n", xlab = "", ylab = "",
+      ylim = c(-30, 35), xlim = xlim_range, main = "West shore")
+axis(1, at = tick_dates, labels = format(tick_dates, "%d-%b"), las = 1, cex.axis = 0.8)
+points(df_BW_p$date, df_BW_p$middle_ER, pch = 1, col = "#3283a8")
+abline(h = 0, col = "black", lwd = 1)
+points(df_SS_p$date, df_SS_p$middle_GPP, pch = 17, col = "#136F63")
+points(df_SS_p$date, df_SS_p$middle_ER, pch = 2, col = "#136F63")
+abline(h = 0, col = "black", lwd = 1)
+mtext( expression(Metabolism~(mmol~O[2]~m^-3~d^-1)), side = 2, line = 1.85, col = "black")
+
+
+
+gam_gb <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_BW_p)
+gam_sh <- gam(middle_GPP ~ s(as.numeric(date), k = 10), data = df_SS_p)
+date_seq <- seq(min(df_BW_p$date), max(df_BW_p$date), by = "1 day")
+pred_gb <- predict(gam_gb, newdata = data.frame(date = date_seq), se.fit = TRUE)
+pred_sh <- predict(gam_sh, newdata = data.frame(date = date_seq), se.fit = TRUE)
+lines(date_seq, pred_gb$fit, col = "#3283a8", lwd = 2)
+lines(date_seq, pred_sh$fit, col = "#136F63", lwd = 2)
+polygon(c(date_seq, rev(date_seq)), c(pred_gb$fit + 2*pred_gb$se.fit, rev(pred_gb$fit - 2*pred_gb$se.fit)),
+        col = adjustcolor("#3283a8", alpha.f = 0.2), border = NA)
+polygon(c(date_seq, rev(date_seq)), c(pred_sh$fit + 2*pred_sh$se.fit, rev(pred_sh$fit - 2*pred_sh$se.fit)),
+        col = adjustcolor("#136F63", alpha.f = 0.2), border = NA)
+
+
+
+
+gam_gb_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_BW_p)
+gam_sh_e <- gam(middle_ER ~ s(as.numeric(date), k = 10), data = df_SS_p)
+date_seq_e <- seq(min(df_BW_p$date), max(df_BW_p$date), by = "1 day")
+pred_gb_e <- predict(gam_gb_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+pred_sh_e <- predict(gam_sh_e, newdata = data.frame(date = date_seq_e), se.fit = TRUE)
+lines(date_seq, pred_gb_e$fit, col = "#3283a8", lwd = 2)
+lines(date_seq, pred_sh_e$fit, col = "#136F63", lwd = 2)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_gb_e$fit + 2*pred_gb_e$se.fit, rev(pred_gb_e$fit - 2*pred_gb_e$se.fit)),
+        col = adjustcolor("#3283a8", alpha.f = 0.2), border = NA)
+polygon(c(date_seq_e, rev(date_seq_e)), c(pred_sh_e$fit + 2*pred_sh_e$se.fit, rev(pred_sh_e$fit - 2*pred_sh_e$se.fit)),
+        col = adjustcolor("#136F63", alpha.f = 0.2), border = NA)
+
+par(new = TRUE)
+flow_ylim <- rev(range(df_BW_p$flow_mean, na.rm = TRUE) + c(0, 1.5 * diff(range(df_BW_p$flow_mean, na.rm = TRUE))))
+plot(df_BW_p$date, df_BW_p$flow_mean, type = "l", col = "#448ff2", lwd = 3, lty=3,
+     axes = FALSE, xlab = "", ylab = "", ylim = flow_ylim)
+axis(4, col.axis = "#448ff2", col = "black")
+mtext(expression("Streamflow ("*m^3*~s^{-1}*")"), side = 4, line = 2.5, col = "#448ff2")
+
+
+par(new = TRUE)
+ppt_max <- max(df_BW_p$ppt_mm, na.rm = TRUE)
+ppt_ylim <- rev(c(0, ppt_max * 2.85))
+
+plot(df_BW_p$date, df_BW_p$ppt_mm, type = "n", axes = FALSE, xlab = "", ylab = "", ylim = ppt_ylim)
+
+# Draw vertical bars for precipitation
+segments(x0 = df_BW_p$date,
+         y0 = 0,
+         x1 = df_BW_p$date,
+         y1 = df_BW_p$ppt_mm,
+         col = "#14c7bb", lwd = 3)
+
+# Right-hand axis
+axis(4,
+     at = pretty(ppt_ylim),
+     labels = pretty(ppt_ylim),
+     line = 3.75, col.axis = "#14c7bb", col = "black")
+mtext(expression("Precipitation (mm)"), side = 4, line = 6, col = "#14c7bb")
+
+
+# legend("bottom", inset = c(-0.05, -0.05), xpd = TRUE,
+#        legend = c("Large inflow", "No inflow", "Streamflow", "Precipitation"), 
+#        col = c("#3283a8", "#136F63", "#448ff2", "#6fded7"), 
+#        pch = c(16, 17, NA, NA), 
+#        lwd = c(NA, NA, 3, 3), 
+#        lty = c(NA, NA, 3, 1),
+#        y.intersp = 1.2, x.intersp = 0.15, bty = "n", horiz = TRUE, cex = 0.9)
+
+
+#
+#dev.off()
+```
+
+
+
+
+
+### Paired differences between shores near and away from streams 
+
+(weekly averaged data)
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
 # 
-# coef_density_plot
+# df_BW_p <- pdat %>%
+#   filter(shore == "BW") %>%
+#   filter(year==2023) %>%
+#   filter(week>1 & week<41) %>%
+#   dplyr::group_by(shore, week, WaterYear) %>%
+#   dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+# 
+# 
+# df_SS_p <- pdat %>%
+#   filter(shore == "SS") %>%
+#   filter(year==2023) %>%
+#   filter(week>1 & week<41)%>%
+#   dplyr::group_by(shore, week, WaterYear) %>%
+#   dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+df_west_subset <- rbind(df_BW_p, df_SS_p)%>%
+  dplyr::select(shore, date, week, middle_GPP, middle_ER_ab, lake_tempC, lake_SPC, ppt_mm, 
+                light_mean, windsp_mean, OM,
+                NO3_mgL_dl, NH4_mgL_dl, PO4_ugL_dl, DOC_mgL_dl)
+
+
+
+df_west_subset2 <- rbind(df_BW_p, df_SS_p)%>%
+  dplyr::select(shore, date, middle_GPP, middle_ER_ab, light_mean, lake_tempC, lake_SPC)
+
+df_wide_w <- df_west_subset2 %>%
+  pivot_wider(
+    id_cols = date,
+    names_from = shore,
+    values_from = c(middle_GPP, middle_ER_ab, light_mean, lake_tempC, lake_SPC),  # use your actual variable names here
+    names_glue = "{.value}_{shore}"
+  )
+
+
+df_diff_w <- df_wide_w %>%
+  mutate(across(ends_with("_BW"), 
+                ~ . - get(sub("_BW", "_SS", cur_column())),
+                .names = "diff_{.col}"))
+
+
+df_only_diffs_w <- df_diff_w %>%
+  select(date, starts_with("diff_"))
+  
+df_long_west <- df_only_diffs_w %>%
+  pivot_longer(
+    cols = -date,
+    names_to = "variable",
+    values_to = "difference"
+  )
+
+# 
+# 
+# coef_order <- c(
+#   "diff_middle_GPP_BW",
+#   "diff_middle_ER_ab_BW",
+#   "diff_lake_tempC_BW",
+#   "diff_lake_SPC_BW",
+#   "diff_light_mean_BW",
+#   "diff_light_mean_BW",
+#   "diff_windsp_mean_BW",
+#   "diff_OM_BW",
+#   "diff_NO3_mgL_dl_BW",
+#   "diff_NH4_mgL_dl_BW", 
+#   "diff_PO4_ugL_dl_BW",
+#   "diff_DOC_mgL_dl_BW"
+#   
+# )
+# 
+# df_long_west <- df_long_west %>%
+#   mutate(variable = fct_relevel(variable, rev(coef_order)))
+
+var_labs <- c(
+  "diff_middle_GPP_BW" = "GPP", 
+  "diff_middle_ER_ab_BW" = "ER", 
+  "diff_lake_tempC_BW" = "W.Temp.", 
+  "diff_lake_SPC_BW" = "SPC",
+  "diff_light_mean_BW" = "Light",
+  "diff_windsp_mean_BW" = "Wind",
+    "diff_ppt_mm_BW" = "PPT",
+  "diff_OM_BW" = "OM",
+  "diff_NO3_mgL_dl_BW" = "NO[3]^'-'",
+  "diff_NH4_mgL_dl_BW" = "NH[4]^'+'",
+  "diff_PO4_ugL_dl_BW" = "Ophos",
+  "diff_DOC_mgL_dl_BW" = "DOC")
+
+
+
+df_long_west2 <- df_long_west %>%
+  mutate(variable = sub("_BW$", "", variable))
+
+df_long_west2$shore <- "BW"
 
 
 ```
+
+
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=8, fig.height=6}
+
+west_shore_diff <- ggplot(df_long_west, aes(x = date, y = difference)) +
+  geom_point(color = "steelblue", shape=19) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  facet_wrap(~ variable, scales = "free_y", ncol = 4,
+             labeller = labeller(variable = as_labeller(var_labs, label_parsed))) +
+  theme_minimal(base_size = 12) +
+  labs(title = "Habitat differences (BW - SS)",
+       x = "Week",
+       y = "Difference") +
+  theme(strip.text = element_text(size = 10, face = "bold")) +
+    scale_x_date(
+  date_breaks = "4 week",
+  date_labels = "%d-%b"
+  #limits = c(as.Date("2021-09-29"), as.Date("2023-10-01"))
+  )
+
+west_shore_diff
+```
+
+### Paired shore analysis:
+
+Reporting the % differences for all water quality in the MS text.   
+Just GPP and ER can be added at the time series.
+
+We are interested in GPP diff shapes for west for east - for all the combinations to get the difference 
+Light and temp on x and GPP on y 
+
+Way of are the inflow sites more similar to each other or GPP and light - verse ER- with temp 
+Nearshore locations regardless of shore are more similar to each than location -  or they aren't 
+
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+
+# df_GB_p <- pdat %>%
+#   filter(shore == "GB") %>%
+#   filter(year==2023) %>%
+#   filter(week>4 & week<41) %>%
+#   dplyr::group_by(shore, week, WaterYear) %>%
+#   dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+# 
+# df_SH_p <- pdat %>%
+#   filter(shore == "SH") %>%
+#   filter(year==2023) %>%
+#   filter(week>4 & week<41)%>%
+#   dplyr::group_by(shore, week, WaterYear) %>%
+#   dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+df_east_subset <- rbind(df_GB_p, df_SH_p)%>%
+  dplyr::select(shore, week, middle_GPP, middle_ER_ab, lake_tempC, lake_SPC, ppt_mm, 
+                light_mean, windsp_mean, OM,
+                NO3_mgL_dl, NH4_mgL_dl, PO4_ugL_dl, DOC_mgL_dl)
+
+
+df_west_subset2 <- rbind(df_GB_p, df_SH_p)%>%
+  dplyr::select(shore, date, middle_GPP, middle_ER_ab, light_mean, lake_tempC, lake_SPC)
+
+
+df_wide_e <- df_west_subset2 %>%
+  pivot_wider(
+    id_cols = date,
+    names_from = shore,
+    values_from = c(middle_GPP, middle_ER_ab, light_mean, lake_tempC, lake_SPC),  # use your actual variable names here
+    names_glue = "{.value}_{shore}"
+  )
+
+
+df_diff_e <- df_wide_e %>%
+  mutate(across(ends_with("_GB"), 
+                ~ . - get(sub("_GB", "_SH", cur_column())),
+                .names = "diff_{.col}"))
+
+
+df_only_diffs_e <- df_diff_e %>%
+  select(date, starts_with("diff_"))
+  
+df_long_east <- df_only_diffs_e %>%
+  pivot_longer(
+    cols = -date,
+    names_to = "variable",
+    values_to = "difference"
+  )
+
+var_labs <- c(
+  "diff_middle_GPP_GB" = "GPP", 
+  "diff_middle_ER_ab_GB" = "ER", 
+  "diff_lake_tempC_GB" = "W.Temp.", 
+  "diff_lake_SPC_GB" = "SPC",
+  "diff_light_mean_GB" = "Light",
+  "diff_windsp_mean_GB" = "Wind",
+    "diff_ppt_mm_GB" = "PPT",
+  "diff_OM_GB" = "OM",
+  "diff_NO3_mgL_dl_GB" = "NO[3]^'-'",
+  "diff_NH4_mgL_dl_GB" = "NH[4]^'+'",
+  "diff_PO4_ugL_dl_GB" = "Ophos",
+  "diff_DOC_mgL_dl_GB" = "DOC")
+
+
+
+var_labs <- c(
+  "diff_middle_GPP" = "GPP", 
+  "diff_middle_ER_ab" = "ER", 
+  "diff_lake_tempC" = "W.Temp.", 
+  "diff_lake_SPC" = "SPC")
+
+
+df_long_east2 <- df_long_east %>%
+  mutate(variable = sub("_GB$", "", variable))
+
+df_long_east2$shore <- "GB"
+
+```
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=9.5, fig.height=7}
+
+long_df <- rbind(df_long_east2, df_long_west2)
+
+long_df <- long_df %>%
+  mutate(variable = factor(variable, levels = c(
+    "diff_middle_GPP", 
+    "diff_middle_ER_ab", 
+    "diff_light_mean", 
+    "diff_lake_tempC",
+    "diff_lake_SPC"
+    
+  )))
+
+var_labs <- c(
+  "diff_middle_GPP" = "GPP",
+  "diff_middle_ER_ab" = "ER",
+  "diff_light_mean" = "Light",
+    "diff_lake_tempC" = "Temperature",
+        "diff_lake_SPC" = "SPC"
+  
+)
+
+shore_diff <- ggplot(long_df, aes(x = date, y = (difference), color = shore, shape = shore)) +
+  geom_point(alpha = 0.75, size=2.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  facet_wrap(~ variable, ncol = 2, nrow = 3,
+             labeller = labeller(variable = as_labeller(var_labs, label_parsed)), scale="free") +
+  theme_classic(base_size = 12) +
+  scale_x_date(
+    date_breaks = "6 week",
+    date_labels = "%d-%b"
+  ) +
+  labs(
+    x = NULL,
+    y = expression(Scaled~Delta)
+  ) +
+  theme(legend.position = "bottom") +
+  scale_color_manual(
+    name = "Shore",
+    values = c(BW = "#3283a8", GB = "#a67d17"),
+    labels = c(BW = "West shore", GB = "East shore")
+  ) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c(BW = 19, GB = 17),
+    labels = c(BW = "West shore", GB = "East shore")
+  )
+
+shore_diff
+
+
+shore_diff_sum <- long_df %>%
+  group_by(variable, shore) %>%
+  summarise(
+    diff_m = mean(difference, na.rm = TRUE),
+    diff_sd = sd(difference, na.rm = TRUE),
+    n = sum(!is.na(difference)),
+    diff_se = diff_sd / sqrt(n),
+    .groups = "drop"
+  )
+
+
+```
+
+```{r, warning=F, size = 'small', echo=F, include=FALSE}
+# ggsave("/Users/kellyloria/Documents/Publications/CH2\ Streamflow\ and\ nearshore\ metabolism/LandO_Submission/Revisions/Figures/Fig_nearshore_dat_shore_diff_lg.png", plot = shore_diff, width = 7, height = 7, units = "in")
+
+```
+
+
+
+```{r, warning=F, echo=FALSE, include=F}
+
+date_seq <- seq(from = as.Date("2021-06-01"), to = as.Date("2023-09-20"), by = "day")
+date_df <- data.frame(date = date_seq)
+date_df <- date_df %>%
+  mutate(yday=yday(date),
+         year = year(date))
+
+
+library(dplyr)
+library(lubridate)
+
+water_year_week <- function(data) {
+  data %>%
+    mutate(date = ymd(date)) %>%
+    mutate(
+      WaterYear = if_else(month(date) >= 10, year(date) + 1, year(date)),
+      wy_start = ymd(paste0(WaterYear - 1, "-10-01")),
+      WY_week = as.integer(floor(difftime(date, wy_start, units = "weeks")) + 1)
+    ) %>%
+    select(-wy_start)  # optional, to clean up intermediate column
+}
+
+
+date_df <- water_year_week(date_df)
+
+week_df <- date_df %>%
+  dplyr::select(WaterYear, WY_week)
+
+
+```
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=5, fig.height=4}
+
+dat <- water_year_week(dat)
+
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_BW <- dat %>%
+  mutate(middle_ER_ab = c(middle_ER*-1)) %>%
+  dplyr::select(shore, date, WY_week, WaterYear, 
+                lake_DO, middle_GPP, middle_ER_ab, middle_NEP,
+                lake_tempC, ppt_mm, light_mean) %>%
+  filter(shore == "BW") %>%
+  dplyr::group_by(shore, WY_week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+summary(GPP_df_BW)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO_BW <- GPP_df_BW %>%
+    filter(!is.na(lake_DO)) %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         plot_ER = ifelse(is.na(middle_ER_ab), 0, middle_ER_ab), 
+         plot_NEP = ifelse(is.na(middle_NEP), 0, middle_NEP))
+
+# Identify the unique yday values for each year
+week_2022 <- unique(plot_data_DO_BW$WY_week[plot_data_DO_BW$WaterYear == 2022])
+week_2023 <- unique(plot_data_DO_BW$WY_week[plot_data_DO_BW$WaterYear == 2023])
+
+# Find the common yday values across all three years
+common_week_BW <- Reduce(intersect, list(week_2022, 
+                                      week_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_BW <- plot_data_DO_BW %>%
+  filter(WY_week %in% common_week_BW & WaterYear %in% c(2022, 2023))
+
+filtered_data_BW_cs <- filtered_data_BW%>%
+  arrange(WY_week, WaterYear) %>%
+  group_by(WaterYear) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP),
+         ERcumsum = cumsum(plot_ER), 
+         NEPcumsum = cumsum(plot_NEP))
+
+
+filtered_data_BW_csT<- filtered_data_BW_cs%>%filter(WaterYear==2022)
+
+filtered_data_BW_csT1<- filtered_data_BW_cs%>%filter(WaterYear==2023)
+
+
+BW_week_df <- week_df %>%
+  left_join(filtered_data_BW, by=c("WY_week", "WaterYear"))
+
+
+BW_plot <- ggplot(filtered_data_BW_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = GPPcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+  labs(x = "Week of Water Year", color = "Year", 
+       title = "BW: west shore large inflow") +
+      ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +    ylim(0,335) +
+  scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+
+BW_plot
+
+
+BW_plot_ER <- ggplot(filtered_data_BW_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = ERcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+  labs(x = "Week of Water Year", color = "Year") +
+            ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +   # ylim(0,335) +    
+  ylim(0,410) +
+    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+  theme_classic() 
+
+BW_plot_ER
+
+
+
+
+
+BW_plot_NEP <- ggplot(filtered_data_BW_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = plot_NEP, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+  labs(x = "Week of Water Year", color = "Year") +
+            ylab(expression(NEP~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +   # ylim(0,335) +    
+  #ylim(0,400) +
+    ylim(-12, 12) +
+       geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+
+BW_plot_NEP
+# # Compute the maximum cumulative GPP for each year
+# date_datf_plt_sum <- date_datf_plt_bw %>%
+#   group_by(year) %>%
+#   summarise(
+#     T_gpp = max(GPP_cumsum, na.rm = TRUE)) %>%
+#   mutate(percent_change = (T_gpp -T_gpp[year == 2023]) / T_gpp * 100)
+
+
+```
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=5, fig.height=4}
+
+dat <- water_year_week(dat)
+
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_GB <- dat %>%
+  mutate(middle_ER_ab = c(middle_ER*-1)) %>%
+  dplyr::select(shore, date, WY_week, WaterYear, lake_DO, middle_GPP, middle_ER_ab, 
+                middle_NEP, 
+                lake_tempC, ppt_mm, light_mean) %>%
+  filter(shore == "GB") %>%
+  dplyr::group_by(shore, WY_week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+summary(GPP_df_GB)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO_GB <- GPP_df_GB %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         plot_ER = ifelse(is.na(middle_ER_ab), 0, middle_ER_ab),
+                  plot_NEP = ifelse(is.na(middle_NEP), 0, middle_NEP))
+
+
+# Identify the unique yday values for each year
+week_2022 <- unique(plot_data_DO_GB$WY_week[plot_data_DO_GB$WaterYear == 2022])
+week_2023 <- unique(plot_data_DO_GB$WY_week[plot_data_DO_GB$WaterYear == 2023])
+
+# Find the common yday values across all three years
+common_week_GB <- Reduce(intersect, list(week_2022, 
+                                      week_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_GB <- plot_data_DO_GB %>%
+  filter(WY_week %in% common_week_GB & WaterYear %in% c(2022, 2023))
+
+filtered_data_GB_cs <- filtered_data_GB%>%
+  arrange(WY_week, WaterYear) %>%
+  group_by(WaterYear) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP),
+         ERcumsum = cumsum(plot_ER))
+
+
+filtered_data_GB_csT<- filtered_data_GB_cs%>%filter(WaterYear==2022)
+
+filtered_data_GB_csT1<- filtered_data_GB_cs%>%filter(WaterYear==2023)
+
+
+GB_week_df <- week_df %>%
+  left_join(filtered_data_GB, by=c("WY_week", "WaterYear"))
+
+
+GB_plot <- ggplot(filtered_data_GB_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = GPPcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year", 
+         title = "GB: east shore small inflow") +
+     # ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +
+      ylab(NULL) +
+      ylim(0,335) +
+    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+
+GB_plot
+
+
+
+GB_plot_ER <- ggplot(filtered_data_GB_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = ERcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+      #    ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+xlab(NULL) +
+      ylab(NULL) +
+      ylim(0,410) +
+  scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+
+
+
+GB_plot_NEP <- ggplot(filtered_data_GB_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = plot_NEP, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+      #    ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+xlab(NULL) +
+      ylab(NULL) +
+    ylim(-12, 12) +
+   #   ylim(0,410) +
+    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+         geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+  theme_classic() 
+
+
+# # Compute the maximum cumulative GPP for each year
+# date_datf_plt_sum <- date_datf_plt_bw %>%
+#   group_by(year) %>%
+#   summarise(
+#     T_gpp = max(GPP_cumsum, na.rm = TRUE)) %>%
+#   mutate(percent_change = (T_gpp -T_gpp[year == 2023]) / T_gpp * 100)
+
+
+```
+
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=5, fig.height=4}
+
+dat <- water_year_week(dat)
+
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_SS <- dat %>%
+  mutate(middle_ER_ab = c(middle_ER*-1)) %>%
+  dplyr::select(shore, date, WY_week, WaterYear, lake_DO, middle_GPP, middle_ER_ab, 
+                middle_NEP,
+                lake_tempC, ppt_mm, light_mean) %>%
+  filter(shore == "SS") %>%
+  dplyr::group_by(shore, WY_week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+summary(GPP_df_SS)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO_SS <- GPP_df_SS %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         plot_ER = ifelse(is.na(middle_ER_ab), 0, middle_ER_ab),
+                  plot_NEP = ifelse(is.na(middle_NEP), 0, middle_NEP)
+         )
+
+# Identify the unique yday values for each year
+week_2022 <- unique(plot_data_DO_SS$WY_week[plot_data_DO_SS$WaterYear == 2022])
+week_2023 <- unique(plot_data_DO_SS$WY_week[plot_data_DO_SS$WaterYear == 2023])
+
+# Find the common yday values across all three years
+common_week_SS <- Reduce(intersect, list(week_2022, 
+                                      week_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_SS <- plot_data_DO_SS %>%
+  filter(WY_week %in% common_week_SS & WaterYear %in% c(2022, 2023))
+
+filtered_data_SS_cs <- filtered_data_SS%>%
+  arrange(WY_week, WaterYear) %>%
+  group_by(WaterYear) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP),
+         ERcumsum = cumsum(plot_ER))
+
+
+filtered_data_SS_csT<- filtered_data_SS_cs%>%filter(WaterYear==2022)
+
+filtered_data_SS_csT1<- filtered_data_SS_cs%>%filter(WaterYear==2023)
+
+
+SS_week_df <- week_df %>%
+  left_join(filtered_data_SS, by=c("WY_week", "WaterYear"))
+
+
+SS_plot <- ggplot(filtered_data_SS_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = GPPcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year", 
+         title = "SS: west shore no inflow") +
+   #   ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +
+      ylab(NULL) +
+  ylim(0,335) +
+    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)"))+  theme_classic() 
+
+SS_plot
+
+
+
+SS_plot_E <- ggplot(filtered_data_SS_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = ERcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+     #   ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+xlab(NULL) +
+      ylab(NULL) +
+      ylim(0,410) +    scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)")) +
+  theme_classic() 
+
+SS_plot_E
+
+
+
+
+SS_plot_NEP <- ggplot(filtered_data_SS_cs%>%filter(WaterYear>2021), aes(x = WY_week, y = plot_NEP, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+     #   ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+xlab(NULL) +     geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+
+      ylab(NULL) +
+    ylim(-12, 12) +
+  #    ylim(0,410) +     
+  scale_color_manual(values=c("#c94738", "#054fb9"), name= "WY", 
+                     labels = c("2022 (dry)", "2023 (wet)"))+
+  theme_classic() 
+
+SS_plot_NEP
+
+# # Compute the maximum cumulative GPP for each year
+# date_datf_plt_sum <- date_datf_plt_bw %>%
+#   group_by(year) %>%
+#   summarise(
+#     T_gpp = max(GPP_cumsum, na.rm = TRUE)) %>%
+#   mutate(percent_change = (T_gpp -T_gpp[year == 2023]) / T_gpp * 100)
+
+
+```
+
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=5, fig.height=4}
+
+dat <- water_year_week(dat)
+
+# Filter the dataset to only include rows where do.obs_m or GPP_mean are not NA
+GPP_df_SH <- dat %>%
+  mutate(middle_ER_ab = c(middle_ER*-1)) %>%
+  dplyr::select(shore, date, WY_week, WaterYear, lake_DO, middle_GPP, middle_ER_ab, 
+                middle_NEP,
+                lake_tempC, ppt_mm, light_mean) %>%
+  filter(shore == "SH") %>%
+  dplyr::group_by(shore, WY_week, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE), .groups = "drop")
+
+summary(GPP_df_SH)
+# date range 2021-06-11  to 2023-09-14   
+
+plot_data_DO_SH <- GPP_df_SH %>%
+  mutate(has_do = !is.na(lake_DO), 
+         has_GPP = !is.na(middle_GPP),
+         plot_GPP = ifelse(is.na(middle_GPP), 0, middle_GPP),
+         has_ER = !is.na(middle_ER_ab),
+         plot_ER = ifelse(is.na(middle_ER_ab), 0, middle_ER_ab),
+         plot_NEP = ifelse(is.na(middle_NEP), 0, middle_NEP))
+
+# Identify the unique yday values for each year
+week_2022 <- unique(plot_data_DO_SH$WY_week[plot_data_DO_SH$WaterYear == 2022])
+week_2023 <- unique(plot_data_DO_SH$WY_week[plot_data_DO_SH$WaterYear == 2023])
+
+# Find the common yday values across all three years
+common_week_SH <- Reduce(intersect, list(week_2022, 
+                                      week_2023))
+
+# Filter the dataframe for only those common yday values
+filtered_data_SH <- plot_data_DO_SH %>%
+  filter(WY_week %in% common_week_SH & WaterYear %in% c(2023))
+
+filtered_data_SH_cs <- filtered_data_SH%>%
+  arrange(WY_week, WaterYear) %>%
+  group_by(WaterYear) %>%
+  mutate(GPPcumsum = cumsum(plot_GPP),
+         ERcumsum = cumsum(plot_ER)
+           )
+
+
+filtered_data_SH_csT<- filtered_data_SH_cs%>%filter(WaterYear==2022)
+
+filtered_data_SH_csT1<- filtered_data_SH_cs%>%filter(WaterYear==2023)
+
+
+SH_week_df <- week_df %>%
+  left_join(filtered_data_SH, by=c("WY_week", "WaterYear"))
+
+
+SH_plot <- ggplot(filtered_data_SH_cs%>%filter(WaterYear>2022), aes(x = WY_week, y = GPPcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year", 
+         title = "SH: east shore no inflow") +
+     # ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +
+      ylab(NULL) +
+    ylim(0,335) +
+      scale_color_manual(values=c("#054fb9"), name= "WY", 
+                     labels = c("2023 (wet)")) +
+  theme_classic() 
+
+SH_plot
+
+
+
+SH_plot_E <- ggplot(filtered_data_SH_cs%>%filter(WaterYear>2022), aes(x = WY_week, y = ERcumsum, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+     # ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +
+    ylab(NULL) +
+    ylim(0,410) +
+      scale_color_manual(values=c("#054fb9"), name= "WY", 
+                     labels = c("2023 (wet)")) +  theme_classic() 
+
+SH_plot_NEP <- ggplot(filtered_data_SH_cs%>%filter(WaterYear>2022) %>%filter(WY_week> 18) %>%  mutate(middle_NEP = ifelse(is.na(middle_NEP), 0, middle_NEP)), aes(x = WY_week, y = middle_NEP, color = factor(WaterYear))) +
+  geom_line(size = 1, alpha=0.95) + 
+    labs(x = "Week of Water Year", color = "Year") +
+     # ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1)))+
+  xlab(NULL) +
+    ylab(NULL) +
+  xlim(0,51)+
+  ylim(-12, 12) +
+       geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+    #ylim(0,410) +
+      scale_color_manual(values=c("#054fb9"), name= "WY", 
+                     labels = c("2023 (wet)")) +
+  theme_classic() 
+
+SH_plot_NEP
+# # Compute the maximum cumulative GPP for each year
+# date_datf_plt_sum <- date_datf_plt_bw %>%
+#   group_by(year) %>%
+#   summarise(
+#     T_gpp = max(GPP_cumsum, na.rm = TRUE)) %>%
+#   mutate(percent_change = (T_gpp -T_gpp[year == 2023]) / T_gpp * 100)
+
+
+```
+
+### Cummulative GPP and ER in wet and dry years 
+ 
+ weekly dynamics
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=12, fig.height=6}
+
+Cumsum_grid <- ggarrange(
+  BW_plot,
+  SS_plot,
+  GB_plot,
+  SH_plot,
+  BW_plot_ER,
+  SS_plot_E,
+  GB_plot_ER,
+  SH_plot_E,
+  BW_plot_NEP,
+  SS_plot_NEP,
+  GB_plot_NEP,
+  SH_plot_NEP,
+  align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+  #hjust = 0.1,
+  vjust = 1,
+    common.legend = TRUE, 
+  legend = "bottom",
+ ncol = 4, nrow = 3)
+
+Cumsum_grid
+
+```
+
+
+
+
+```{r, warning=F, size = 'small', echo=F, include=F, fig.width=6, fig.height=4}
+# ggsave("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/Figs/SI_gppCS_panel_long.png", plot = Cumsum_grid, width = 12, height = 6, units = "in")
+
+```
+
+
+
+### NEP in wet and dry years 
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=12, fig.height=2}
+
+Cumsum_grid <- ggarrange(
+  BW_plot_NEP,
+  SS_plot_NEP,
+  GB_plot_NEP,
+  SH_plot_NEP,
+  align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+  #hjust = 0.1,
+  vjust = 1,
+    common.legend = TRUE, 
+  legend = "bottom",
+ ncol = 4, nrow = 1)
+
+Cumsum_grid
+
+```
+
+#### Other important metabolic relationships: 
+
+- ER and GPP 
+
+- GPP and light
+
+- ER and Temp
+
+
+Overlapping weekly metabolism, light, and temperature from WY 22 and WY 23 for all shores
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+week_dat_all_shore <- rbind(
+  filtered_data_BW_cs,
+  filtered_data_GB_cs,
+  filtered_data_SS_cs,
+  filtered_data_SH_cs)
+
+
+library(dplyr)
+library(broom)
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- week_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(light_mean), log10(middle_GPP), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+  mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- week_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(
+    x = 240,
+    y = 1.5
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+# Now the plot
+GPP_light_plots <- ggplot(week_dat_all_shore, aes(y = middle_GPP, x = light_mean, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.75) +
+  scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  ylab(expression(log(GPP)~(mmol~O[2]~m^-3~d^-1))) +
+  xlab(expression(log(Benthic~light)~(mu*mol~m^-2~s^-1))) +
+  geom_smooth(method="lm", se=F) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+    labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+               SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+    labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+               SS = "West shore no inflow", SH = "East shore no inflow")) +
+  geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+  theme_classic() +
+  facet_grid(shore ~ .)
+
+GPP_light_plots
+
+
+```
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- week_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(lake_tempC), log10(middle_ER_ab), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+    mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- week_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(
+    x = max((lake_tempC), na.rm = TRUE),
+    y = 22
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+
+
+ER_temp_plots <- ggplot(week_dat_all_shore, aes(y = middle_ER_ab, x = lake_tempC, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.75) +
+    scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+      scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+    xlab(expression(log(Benthic~temperature)~(degree*C))) +
+    ylab(expression(log("|"~ER~"|")~(mmol~O[2]~m^-3~d^-1))) +
+ geom_smooth(method="lm", se=F) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+        labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+       labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  theme_classic()  +
+    geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+      facet_grid(shore~.) 
+
+ER_temp_plots
+
+```
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+
+
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- week_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(middle_GPP), log10(middle_ER_ab), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+      mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- week_dat_all_shore %>%
+ group_by(shore) %>%
+  summarise(
+    x = 15,
+    y = 22
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+
+
+GPP_ER_plots <- ggplot(week_dat_all_shore, aes(y = middle_ER_ab, x = middle_GPP, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.75) +
+      scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+    scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  xlab(expression(log(GPP)~(mmol~O[2]~m^-3~d^-1))) +
+  ylab(expression(log("|"~ER~"|")~(mmol~O[2]~m^-3~d^-1))) +
+  geom_smooth(method="lm", se=F) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+        labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+       labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  theme_classic() +
+    geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+      facet_grid(shore~.)
+
+
+GPP_ER_plots
+
+```
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=8, fig.height=8}
+
+metab_grid <- ggarrange(
+  GPP_ER_plots,
+  GPP_light_plots,
+  ER_temp_plots,
+  align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+  #hjust = 0.1,
+  vjust = 1,
+    common.legend = TRUE, 
+  legend = "bottom",
+ ncol = 3, nrow = 1)
+
+metab_grid
+
+```
+
+#### Daily data:
+
+Only on shared observations witin shore for GPP and ER from WY 22 and WY 23
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+
+day_dat_all_shore <- rbind(
+  filtered_data_BW_d,
+  filtered_data_GB_d,
+  filtered_data_SS_d,
+  filtered_data_SH_d)
+```
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=6, fig.height=12}
+
+
+library(dplyr)
+library(broom)
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- day_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(light_mean), log10(middle_GPP), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+  mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- day_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(
+    x = 250,
+    y = 0.15
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+# Now the plot
+GPP_light_plots <- ggplot(day_dat_all_shore, aes(y = middle_GPP, x = light_mean, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.35) +
+  scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  ylab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  xlab(expression(Benthic~light~(mu*mol~m^-2~s^-1))) +
+    geom_smooth(
+    data = subset(day_dat_all_shore, shore != "SS"),
+    method = "lm", se = FALSE
+  ) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+    labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+               SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+    labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+               SS = "West shore no inflow", SH = "East shore no inflow")) +
+  geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+  theme_classic() +
+  facet_grid(shore ~ .)
+
+GPP_light_plots
+
+
+```
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- day_dat_all_shore %>%
+  filter(middle_ER_ab<40) %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(lake_tempC), log10(middle_ER_ab), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+    mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- day_dat_all_shore %>%
+  filter(middle_ER_ab<40) %>%
+  group_by(shore) %>%
+  summarise(
+    x = 19,
+    y = 36
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+
+
+ER_temp_plots <- ggplot(day_dat_all_shore%>%filter(middle_ER_ab<40), aes(y = middle_ER_ab, x = lake_tempC, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.35) +
+    scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+      scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+    xlab(expression(Water~temperature~(degree*C))) +
+    ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1))) +
+      geom_smooth(
+    data = subset(day_dat_all_shore, shore != "BW"),
+    method = "lm", se = FALSE
+  ) +
+ 
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+        labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+       labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  theme_classic()  +
+    geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+      facet_grid(shore~.) 
+
+ER_temp_plots
+
+```
+
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+
+
+
+# Compute correlation coefficients and p-values per shore
+cor_stats <- day_dat_all_shore %>%
+  group_by(shore) %>%
+  summarise(cor_test = list(cor.test(log10(middle_GPP), log10(middle_ER_ab), method = "pearson"))) %>%
+  mutate(tidy = purrr::map(cor_test, broom::tidy)) %>%
+  unnest(tidy) %>%
+      mutate(label = paste0(
+  "italic(r)^2 == ", round(estimate^2, 2),
+  " *','~ ", 
+  ifelse(p.value < 0.001, "p < 0.001", paste0("p == ", round(p.value, 3)))
+))
+
+
+# Merge with max x/y position per shore to position text nicely
+label_positions <- day_dat_all_shore %>%
+ group_by(shore) %>%
+  summarise(
+    x = 15,
+    y = 36
+  ) %>%
+  left_join(cor_stats, by = "shore")
+
+
+
+GPP_ER_plots <- ggplot(day_dat_all_shore, aes(y = middle_ER_ab, x = middle_GPP, color = as.factor(shore), shape=shore)) +
+  geom_point(size=2, alpha=0.35) +
+      scale_y_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+    scale_x_continuous(trans = "log", breaks = scales::log_breaks(base = 10)) +
+  xlab(expression(GPP~(mmol~O[2]~m^-3~d^-1))) +
+  ylab(expression("|"~ER~"|"~(mmol~O[2]~m^-3~d^-1))) +
+  geom_smooth(method="lm", se=F) +
+  scale_color_manual(
+    name = "Shore",
+    values = c("BW" = "#3283a8", "GB" = "#a67d17", "SS" = "#136F63",  SH = "#c76640"),
+        labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  scale_shape_manual(
+    name = "Shore",
+    values = c("BW" = 19, "GB" = 17, "SS" = 1, "SH" = 2),
+       labels = c(BW = "West shore large inflow", GB = "East shore small inflow", 
+                   SS = "West shore no inflow", SH = "East shore no inflow")) +
+  theme_classic() +
+    geom_text(data = label_positions, aes(x = x, y = y, label = label),
+          parse = TRUE, inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3.5) +
+      facet_grid(shore~.)
+
+
+GPP_ER_plots
+
+```
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=8, fig.height=8}
+
+metab_grid <- ggarrange(
+  GPP_ER_plots,
+  GPP_light_plots,
+  ER_temp_plots,
+  align=c("v"),
+  #label.x = 0.1,
+  #label.y = 1,
+  #hjust = 0.1,
+  vjust = 1,
+    common.legend = TRUE, 
+  legend = "bottom",
+ ncol = 3, nrow = 1)
+
+metab_grid
+
+```
+
+
+
+```{r, warning=F, size = 'small', echo=F, include=F, fig.width=6, fig.height=4}
+# ggsave("/Users/kellyloria/Documents/Publications/CH1\ biogeochem\ linkages/Figs/Fig5_Met_cor_panel_long.png", plot = metab_grid, width = 7.5, height = 7, units = "in")
+
+```
+
+
+
+##### GB GPP - SH GPP v  GB light - SH light 
+
+
+
+
+```{r, warning=F, echo=FALSE, include=F, fig.width=7, fig.height=5}
+week_df_wide_shore <- rbind(
+  df_BW_p,
+  df_SS_p,
+  df_GB_p,
+  df_SH_p)
+
+names(week_df_wide_shore)
+
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(stringr)
+
+# Get unique shores
+unique_shores <- unique(week_df_wide_shore$shore)
+
+# All possible shore pairs (excluding self-comparisons)
+shore_pairs <- combn(unique_shores, 2, simplify = FALSE)
+
+compute_pair_diff <- function(df, shore1, shore2) {
+  df1 <- df %>%
+    filter(shore == shore1) %>%
+    select(week, WaterYear, middle_GPP) %>%
+    rename(GPP1 = middle_GPP)
+  
+  df2 <- df %>%
+    filter(shore == shore2) %>%
+    select(week, WaterYear, middle_GPP) %>%
+    rename(GPP2 = middle_GPP)
+  
+  full_join(df1, df2, by = c("week", "WaterYear")) %>%
+    mutate(
+      GPP_diff = GPP1 - GPP2,
+      shore_pair = paste0(shore1, "_", shore2)
+    )
+}
+
+# Use this instead if you want a tidy long format
+tidy_diff_GPP <- map_dfr(shore_pairs, ~ compute_pair_diff(week_df_wide_shore, .x[1], .x[2]))
+
+
+
+compute_pair_diff_ER <- function(df, shore1, shore2) {
+  df1 <- df %>%
+    filter(shore == shore1) %>%
+    select(week, WaterYear, ER_abs) %>%
+    rename(ER1 = ER_abs)
+  
+  df2 <- df %>%
+    filter(shore == shore2) %>%
+    select(week, WaterYear, ER_abs) %>%
+    rename(ER2 = ER_abs)
+  
+  full_join(df1, df2, by = c("week", "WaterYear")) %>%
+    mutate(
+      ER_diff = ER1 - ER2,
+      shore_pair = paste0(shore1, "_", shore2)
+    )
+}
+
+# Use this instead if you want a tidy long format
+tidy_diff_ER <- map_dfr(shore_pairs, ~ compute_pair_diff_ER(week_df_wide_shore, .x[1], .x[2]))
+
+
+
+
+compute_pair_diff_light <- function(df, shore1, shore2) {
+  df1 <- df %>%
+    filter(shore == shore1) %>%
+    select(week, WaterYear, light_mean) %>%
+    rename(light1 = light_mean)
+  
+  df2 <- df %>%
+    filter(shore == shore2) %>%
+    select(week, WaterYear, light_mean) %>%
+    rename(light2 = light_mean)
+  
+  full_join(df1, df2, by = c("week", "WaterYear")) %>%
+    mutate(
+      light_diff = light1 - light2,
+      shore_pair = paste0(shore1, "_", shore2)
+    )
+}
+
+# Use this instead if you want a tidy long format
+tidy_diff_light <- map_dfr(shore_pairs, ~ compute_pair_diff_light(week_df_wide_shore, .x[1], .x[2]))
+
+
+
+
+compute_pair_diff_temp <- function(df, shore1, shore2) {
+  df1 <- df %>%
+    filter(shore == shore1) %>%
+    select(week, WaterYear, lake_tempC) %>%
+    rename(temp1 = lake_tempC)
+  
+  df2 <- df %>%
+    filter(shore == shore2) %>%
+    select(week, WaterYear, lake_tempC) %>%
+    rename(temp2 = lake_tempC)
+  
+  full_join(df1, df2, by = c("week", "WaterYear")) %>%
+    mutate(
+      temp_diff =temp1 - temp2,
+      shore_pair = paste0(shore1, "_", shore2)
+    )
+}
+
+# Use this instead if you want a tidy long format
+tidy_diff_temp <- map_dfr(shore_pairs, ~ compute_pair_diff_temp(week_df_wide_shore, .x[1], .x[2]))
+
+
+diff_df_shores <- tidy_diff_GPP %>%
+  left_join(tidy_diff_ER%>%dplyr::select(week,WaterYear,ER_diff, shore_pair),
+            by=c("week","WaterYear", "shore_pair")) %>%
+  left_join(tidy_diff_light%>%dplyr::select(week,WaterYear,light_diff, shore_pair),
+            by=c("week","WaterYear", "shore_pair")) %>%
+    left_join(tidy_diff_temp%>%dplyr::select(week,WaterYear,temp_diff, shore_pair),
+            by=c("week","WaterYear", "shore_pair")) %>%
+      left_join(week_df_wide_shore%>%dplyr::select(week,WaterYear,lake_tempC, light_mean),
+            by=c("week","WaterYear"))
+```
+
+### GPP differences by shore pairs and light 
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=7, fig.height=4.5}
+
+light_plots <- ggplot(diff_df_shores, aes(y = GPP_diff, x = light_mean, color = as.factor(shore_pair), shape=shore_pair)) +
+  geom_point(size=2, alpha=0.75) +
+   scale_color_viridis_d(option = "viridis",  name = "Shore pair") +
+  theme_classic()  +
+   geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+      facet_wrap(~shore_pair)
+light_plots
+
+```
+
+
+### GPP differences by shore pairs and  light differences by shore pairs
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=7, fig.height=4.5}
+light_diff_plots <- ggplot(diff_df_shores, aes(y = GPP_diff, x = light_diff, color = as.factor(shore_pair), shape=shore_pair)) +
+  geom_point(size=2, alpha=0.75) +
+  theme_classic()  +
+     scale_color_viridis_d(option = "viridis",  name = "Shore pair") +
+     geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+     geom_vline(xintercept = 0, linetype = "dashed", color = "grey25") +
+      facet_wrap(~shore_pair)
+light_diff_plots
+```
+
+
+### ER differences by shore pairs and temp  
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=7, fig.height=4.5}
+temp_plots <- ggplot(diff_df_shores, aes(y = ER_diff, x = lake_tempC, color = as.factor(shore_pair), shape=shore_pair)) +
+  geom_point(size=2, alpha=0.75) +
+  theme_classic()  +
+     scale_color_viridis_d(option = "viridis",  name = "Shore pair") +
+     geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+      facet_wrap(~shore_pair)
+temp_plots
+```
+
+
+### ER differences by shore pairs and temp by shore pairs
+
+
+```{r, warning=F, echo=FALSE, include=T, fig.width=7, fig.height=4.5}
+temp_diff_plots <- ggplot(diff_df_shores, aes(y = ER_diff, x = temp_diff, color = as.factor(shore_pair), shape=shore_pair)) +
+  geom_point(size=2, alpha=0.75) +
+  theme_classic()  +
+     scale_color_viridis_d(option = "viridis",  name = "Shore pair") +
+     geom_hline(yintercept = 0, linetype = "dashed", color = "grey25") +
+     geom_vline(xintercept = 0, linetype = "dashed", color = "grey25") +
+      facet_wrap(~shore_pair)
+temp_diff_plots
+```
+
+
+
+
+
+
+
+
+
 

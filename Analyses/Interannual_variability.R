@@ -17,38 +17,38 @@ library(ggpattern)
 # Temp path setwd("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/") 
 # NS_analysis_dat.rds"
 
-dat <- readRDS("./NS_analysis_dat.rds")
+dat <- readRDS("/Users/kellyloria/Documents/UNR/MSMmetab/SFS24_Analysis/Final_Scripts/NS_analysis_dat.rds")
 str(dat)
 
 ##===========================================
 ## average data by shore to account for as many observations as possible:
-dat_shore <- dat %>%
-  arrange(shore, yday, date, month, WaterYear) %>%
-  group_by(shore, yday, date, month, WaterYear) %>%
-  summarise(
-    GPP_m = mean(middle_GPP, na.rm=T),
-    ER_m = mean(c(middle_ER * -1), na.rm=T),
-    NEP_m = mean(middle_NEP, na.rm=T),
-    temp_m = mean(lake_tempC, na.rm=T),
-    LakeDO_m = mean(lake_DO, na.rm=T),
-    Kd_m = mean(Kd_fill, na.rm=T),
-    par_3m = mean(light_mean, na.rm=T),
-    ppt_m = mean(ppt_mm, na.rm=T),
-    windsp_m = mean(windsp_mean, na.rm=T)
-  ) 
-
-## optional infill ##
-dat_fill <- dat_shore %>%
-  arrange(shore, WaterYear, yday) %>%
-  group_by(shore, WaterYear) %>%
-  fill(GPP_m, .direction = "down")%>%
-  fill(ER_m, .direction = "down")%>%
-  fill(temp_m, .direction = "down")%>%
-  fill(LakeDO_m, .direction = "down")%>%
-  fill(Kd_m, .direction = "down")%>%
-  fill(par_3m, .direction = "down")%>%
-  fill(ppt_m, .direction = "down")%>%
-  fill(windsp_m, .direction = "down")
+# dat_shore <- dat %>%
+#   arrange(shore, yday, date, month, WaterYear) %>%
+#   group_by(shore, yday, date, month, WaterYear) %>%
+#   summarise(
+#     GPP_m = mean(middle_GPP, na.rm=T),
+#     ER_m = mean(c(middle_ER * -1), na.rm=T),
+#     NEP_m = mean(middle_NEP, na.rm=T),
+#     temp_m = mean(lake_tempC, na.rm=T),
+#     LakeDO_m = mean(lake_DO, na.rm=T),
+#     Kd_m = mean(Kd_fill, na.rm=T),
+#     par_3m = mean(light_mean, na.rm=T),
+#     ppt_m = mean(ppt_mm, na.rm=T),
+#     windsp_m = mean(windsp_mean, na.rm=T)
+#   ) 
+# 
+# ## optional infill ##
+# dat_fill <- dat_shore %>%
+#   arrange(shore, WaterYear, yday) %>%
+#   group_by(shore, WaterYear) %>%
+#   fill(GPP_m, .direction = "down")%>%
+#   fill(ER_m, .direction = "down")%>%
+#   fill(temp_m, .direction = "down")%>%
+#   fill(LakeDO_m, .direction = "down")%>%
+#   fill(Kd_m, .direction = "down")%>%
+#   fill(par_3m, .direction = "down")%>%
+#   fill(ppt_m, .direction = "down")%>%
+#   fill(windsp_m, .direction = "down")
 
 ##===========================================
 # Perform ANOVA for inter annual variation in GPP and ER
@@ -97,12 +97,12 @@ plot_NEP <- ggplot(dat_23, aes(x = interaction(shore), y = (NEP_m), fill = shore
 
 ###################
 ## Create WY-days based on data range: 
-dat_WYvar22 <- dat_fill%>%
+dat_WYvar22 <- dat%>%
   filter(date>as.Date("2021-09-30") & date<as.Date("2022-09-10")) %>%
   mutate(
     WY_doy = as.numeric(difftime(date, as.Date("2021-09-30"), units = "days")) + 1)
 
-dat_WYvar23 <- dat_fill%>%
+dat_WYvar23 <- dat%>%
   filter(date>as.Date("2022-09-30") & date<as.Date("2023-09-10")) %>%
   mutate(
   WY_doy = as.numeric(difftime(date, as.Date("2022-09-30"), units = "days")) + 1)
@@ -110,7 +110,7 @@ dat_WYvar23 <- dat_fill%>%
 dat_WYvar<- rbind(dat_WYvar22, dat_WYvar23)
 ### 
 
-plot_NEPWY <- ggplot(dat_WYvar, aes(x = interaction(WaterYear, shore), y = (NEP_m), pattern = as.factor(WaterYear), fill = shore)) +
+plot_NEPWY <- ggplot(dat_WYvar, aes(x = interaction(WaterYear, shore), y = (middle_NEP), pattern = as.factor(WaterYear), fill = shore)) +
   geom_jitter(aes(color = shore), width = 0.1, height = 0.01, alpha = 0.25) +  # Adding jittered points with 50% transparency
   geom_boxplot_pattern(alpha = 0.9, outlier.alpha = 0.5,
                        pattern_density = 0.25,  
@@ -132,9 +132,9 @@ plot_NEPWY <- ggplot(dat_WYvar, aes(x = interaction(WaterYear, shore), y = (NEP_
 ## Stat summary: 
 dat_WY_S <- dat_WYvar %>%
 filter(WaterYear=="2023" & shore=="SS")
-mean(na.omit(dat_WY_S$NEP_m))
+mean(na.omit(dat_WY_S$middle_NEP))
 
-anova_NEP <- aov(NEP_m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(shore=="SS"))
+anova_NEP <- aov(middle_NEP ~ as.factor(WaterYear), data = dat_WYvar%>%filter(shore=="SS"))
 summary(anova_NEP)
 
 
@@ -146,20 +146,51 @@ dat_WYvar$WY <- as.factor(dat_WYvar$WaterYear)
 # Perform ANOVA for temp
 # sub out sites (BW, GB, SS)
 
-anova_P <- aov(ppt_m ~ as.factor(WaterYear), data =dat_WYvar%>%filter(WY_doy<240, (shore == "SS")))
+## PPT: 
+anova_P <- aov(ppt_mm ~ as.factor(WaterYear), data =dat_WYvar%>%filter(WY_doy<240, (shore == "SS")))
 summary(anova_P)
 
-anova_T <- aov(temp_m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+anova_P <- aov(ppt_mm ~ as.factor(WaterYear), data =dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+summary(anova_P)
+
+anova_P <- aov(ppt_mm ~ as.factor(WaterYear), data =dat_WYvar%>%filter(WY_doy<240, (shore == "BW")))
+summary(anova_P)
+
+
+### Temp :
+anova_T <- aov(lake_tempC ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "SS")))
 summary(anova_T)
 
-anova_K <- aov(Kd_m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+anova_T <- aov(lake_tempC ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+summary(anova_T)
+
+anova_T <- aov(lake_tempC ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "BW")))
+summary(anova_T)
+
+
+### 
+anova_K <- aov(Kd_fill ~ scale((WaterYear)), data = dat_WYvar%>%filter(WY_doy<240, (shore == "SS")))
 summary(anova_K) 
 
-anova_PAR <- aov(par_3m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "BW")))
+anova_K <- aov(Kd_fill ~ scale((WaterYear)), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+summary(anova_K) 
+
+anova_K <- aov(Kd_fill ~ scale((WaterYear)), data = dat_WYvar%>%filter(WY_doy<240, (shore == "BW")))
+summary(anova_K) 
+
+##
+anova_PAR <- aov(par_int_3m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "SS")))
 summary(anova_PAR) 
 
-anova_W <- aov(windsp_m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
-summary(anova_W)
+anova_PAR <- aov(par_int_3m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "GB")))
+summary(anova_PAR) 
+
+anova_PAR <- aov(par_int_3m ~ as.factor(WaterYear), data = dat_WYvar%>%filter(WY_doy<240, (shore == "BW")))
+summary(anova_PAR) 
+
+###
+
+
 
 ## Stat summary: 
 dat_WY_S <- dat_WYvar %>%
@@ -522,3 +553,11 @@ plot_NEP2 <- plot_NEP1 +
 # ggsave(plot = plot_NEP2, filename = paste("./Figures/ANOVA_NEP_season.png",sep=""),width=10,height=4.25,dpi=300)
 
 # end script.
+
+
+dat_WYvar_temp <-dat_WYvar%>%
+  group_by(shore, WaterYear) %>%
+  dplyr::summarise(across(everything(), mean, na.rm = TRUE))
+  
+
+
